@@ -1,8 +1,11 @@
-txs = open("txs.csv", "r")
-inputs = open("inputs.csv", "r")
-outputs = open("outputs.csv", "r")
-newinputs = open("newinputs.csv", "w")
-newoutputs = open("newoutputs.csv", "w")
+from sys import argv
+# takes the following arguments in order:
+txs = open(argv[1], "r")
+inputs = open(argv[2], "r")
+outputs = open(argv[3], "r")
+newinputs = open(argv[4], "w")
+newoutputs = open(argv[5], "w")
+# and fills a new field, txHash, in inputs and outputs
 
 txsList = []
 for line in txs:

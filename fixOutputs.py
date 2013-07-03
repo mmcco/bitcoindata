@@ -1,6 +1,14 @@
-inputs = open("newinputs.csv", "r")
-outputs = open("newoutputs.csv", "r")
-neweroutputs = open("neweroutputs.csv", "w")
+# this script takes CSV files of inputs and outputs that have already been passed through getHashes.py
+# it fills the inputTxHash and inputTxIndex fields in the outputs
+# the third argument is the file to which the new outputs CSV will be saved
+from sys import argv
+
+if len(argv) != 4:
+    raise Exception("wrong number of arguments - three required")
+
+inputs = open(argv[1], "r")
+outputs = open(argv[2], "r")
+neweroutputs = open(argv[3], "w")
 
 inputDict = dict()
 

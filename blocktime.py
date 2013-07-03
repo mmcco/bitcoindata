@@ -1,3 +1,5 @@
+# this script replaces block's ISO 8601 timestamp to a Unix timestamp
+# it takes the input and output files as command line arguments
 from sys import argv
 from dateutil.parser import parse
 import calendar
