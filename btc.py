@@ -10,6 +10,8 @@
 #                       txs.csv
 #                       newInputs.csv
 #                       newOutputs.csv
+#
+# tx is used as an abbreviation for transaction
 
 from sys import argv
 from dateutil.parser import parse
@@ -39,10 +41,11 @@ newBlocks.close()
 
 
 txs = open("transactions.csv", "r")
-txs.readline() # skip first line, which is just column names
+txs.readline()  # skip first line, which is just column names
 newTxs = open("txs.csv", "w")
 # !!! This data type assumes that you're parsing from the genesis block; switch to dict if writing an automated updater !!!
-txHashes = [] # location is txID, value is txHash
+txHashes = []  # location is txID, value is txHash
+hashDict = dict()  # key is txHash, value is corresponding txID(s) - this is used because multiples txs can have the same hashes
 
 for line in txs:
     data = line.split(",", 4)
@@ -52,6 +55,10 @@ for line in txs:
         raise Exception("txIDs and txHashes do not match - len(txHashes) is " + str(len(txHashes)) + " while the txID is " + data[0])
 
     txHashes.append(data[1])
+    if data[1] not in txHashDict:
+        txHashDict[data[1]] = [data[0]]
+    else:
+        txHashDict[data[1]].append(data[0])
     data.insert(4, blockTimes[ int(data[3]) ])
     newTxs.write(",".join(data))
 
@@ -72,6 +79,7 @@ def parseOutput(outputs):
         raise Exception("bad line in outputs.csv")
     return data
 
+
 # we will first get the addresses from the outputs and insert them into the inputs
 inputs = open("inputs.csv", "r")
 inputs.readline() # skip first line, which is just column names
@@ -86,11 +94,19 @@ for line in outputs:
 
 for line in inputs:
     data = parseInput(line)
+    ### !!! LOGIC ERROR !!! using a hash when a txID is expected
+    outputTxHash = data[3]
+    if len(txHashDict[outputTxHash]) == 1:     # if there's only one tx associated with this hash...
+        outputTxID = txHashDict[outputTxHash]  # we just use that one
+    else:
+        outputTxID = txHashDict[outputTxHash].pop(0)  # otherwise, based on the protocol it has to be the oldest tx with this hash
     if data[3] + "," + data[4] not in outputsDict:
-        raise Exception("input index " + data[1] + "from transaction " + data[0] + "does not have a corresponding item in outputsDict")
-    address = outputsDict[ data[3] + "," + data[4] ]
+
+        raise Exception("input index " + data[1] + " from transaction " + data[0] + " does not have a corresponding item in outputsDict")
+    data[3] = outputTxID  # replacing the outputTxHash with an outputTxID
     txHash = txHashes[int(data[0])]
     data.insert(1, txHash)
+    address = outputsDict[ outputTxID + "," + data[4] ]
     data.insert(3, address)
     newInputs.write(",".join(data))
 
