@@ -6,7 +6,7 @@ lastTime = time.time()
 
 con = MySQLdb.connect(host="localhost",
                      user="root",
-                     passwd="*****",
+                     passwd="***",
                      db="btc")
                      #cursorclass = MySQLdb.cursors.SSCursor)
 
@@ -14,7 +14,7 @@ cur = con.cursor()
 
 cur.execute("select count(*) from txs;")
 # make an array with one indice for each transaction; each indice is a list of addresses combined in that transaction
-txs = [[] i in range (0, cur.fetchone()[0])]
+txs = [[] for i in range (0, cur.fetchone()[0])]
 
 print "txs initialized - took " + str(time.time() - lastTime) + " seconds"
 lastTime = time.time()
@@ -25,8 +25,8 @@ addresses = dict() # associates address with user
 # fill a dict with a key for each address
 for line in cur.fetchall():
 
-    if len(line) < 3:
-        raise Exception("bad response from database")
+    if len(line) != 3:
+        raise Exception("bad response from database - length is " + str(len(line)) + " - first elem: " + str(line[0]) + " - second elem: " + str(line[1]))
 
     if not line[1] in addresses:
         # each address is declared with no parent and a rank of 1
