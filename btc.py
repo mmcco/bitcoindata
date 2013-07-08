@@ -1,5 +1,5 @@
-# this script is an attempted all-in-one processor of blockparser's CSV-generator
-# it makes changes that are necessary or convenient, preparing the data for parsing by a SQL database
+# this script is an attempted all-in-one processor of the blockparser CSV-generator's output
+# it makes changes that are necessary or convenient, preparing the data for parsing by a SQL database and for a union-find algorithm to generate a list of entities
 #
 # the input files are:  blocks.csv
 #                       transactions.csv
@@ -16,6 +16,7 @@
 from dateutil.parser import parse
 import calendar
 import datetime
+import gc
 
 blocks = open("blocks.csv", "r")
 blocks.readline()  # skip first line, which is just column names
@@ -62,15 +63,17 @@ newTxs.close()
 
 def parseInput(inputs):
     data = line.split(",")
-    if len(data) != 5:
-        raise Exception("bad line in inputs.csv")
+    # allow data to be of length 5 or 7 because this function is used to parse both inputs.csv and newInputs.csv
+    if len(data) != 5 & len(data) != 7:
+        raise Exception("bad line in inputs - cannot parse")
     return data
 
 def parseOutput(outputs):
     data = line.split(",", 5)
-    data = data[:-1] # throw out the last item in data, it's just ",,"  !!! REMEMBER that this takes the newline off, so you have to add it manually when writing
+    # throw out the last item in data, it's just ",,"  !!! REMEMBER that this takes the newline off, so you have to add it manually when writing
+    data = data[:-1]
     if len(data) != 5:
-        raise Exception("bad line in outputs.csv")
+        raise Exception("bad line in outputs.csv - cannot parse")
     return data
 
 
@@ -111,6 +114,10 @@ inputs.close()
 outputs.close()
 newInputs.close()
 
+# attempting to manually clear memory, as the garbage collector doesn't seem to be doing so
+outputsDict = dict()
+gc.collect()
+
 
 # now we're going to go through a second time, inserting inputs' information into their corresponding outputs
 newInputs = open("newInputs.csv", "r")
@@ -122,7 +129,7 @@ inputsDict = dict()  # key is output txID + "," + output index, value is input's
 
 for line in newInputs:
     data = parseInput(line)
-    inputsDict[ data[5] + "," + data[6] ] = data[0] + "," + data[1]
+    inputsDict[ data[5] + "," + data[6][:-1] ] = data[0] + "," + data[1]  # [:-1] removes newline from data[6]
 
 for line in outputs:
     data = parseOutput(line)
