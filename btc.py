@@ -63,19 +63,19 @@ txs.close()
 newTxs.close()
 
 
-def parseInput(inputs):
-    data = line.split(",")
+def parseInput(inputLine):
+    data = inputLine.split(",")
     # allow data to be of length 5 or 7 because this function is used to parse both inputs.csv and newInputs.csv
-    if len(data) != 5 & len(data) != 7:
-        raise Exception("bad line in inputs - cannot parse")
+    if len(data) != 5 and len(data) != 7:
+        raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine)
     return data
 
-def parseOutput(outputs):
-    data = line.split(",", 5)
+def parseOutput(outputLine):
+    data = outputLine.split(",", 5)
     # throw out the last item in data, it's just ",,"  !!! REMEMBER that this takes the newline off, so you have to add it manually when writing
     data = data[:-1]
     if len(data) != 5:
-        raise Exception("bad line in outputs.csv - cannot parse")
+        raise Exception("bad line in outputs.csv - cannot parse  -==-  " + outputLine)
     return data
 
 def newlineTrim(string):
@@ -134,7 +134,7 @@ newInputs = open("newInputs.csv", "r")
 newInputs.readline() # skip first line, which is just column names
 outputs = open("outputs.csv", "r")
 outputs.readline() # skip first line, which is just column names
-newOutputs = open("newoutputs.csv", "w")
+newOutputs = open("newOutputs.csv", "w")
 inputsDict = dict()  # key is output txID + "," + output index, value is input's txID + "," + input index
 
 for line in newInputs:
