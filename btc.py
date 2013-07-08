@@ -18,6 +18,7 @@ import calendar
 import datetime
 import gc
 
+# we begin by converting each block's timestamp from ISO 8601 to a Unix timestamp
 blocks = open("blocks.csv", "r")
 blocks.readline()  # skip first line, which is just column names
 newBlocks = open("newBlocks.csv", "w")
@@ -40,6 +41,7 @@ blocks.close()
 newBlocks.close()
 
 
+# this section selects the Unix timestamp of each tx's corresponding block and inserts it into the tx
 txs = open("transactions.csv", "r")
 txs.readline()  # skip first line, which is just column names
 newTxs = open("txs.csv", "w")
@@ -76,8 +78,16 @@ def parseOutput(outputs):
         raise Exception("bad line in outputs.csv - cannot parse")
     return data
 
+def newlineTrim(string):
+    if string[-1] == '\n':
+        return string[:-1]
+    else:
+        return string
+
 
 # we will first get the addresses from the outputs and insert them into the inputs
+# we will also insert the txHash into the inputs (which initially only has the txID)
+# finally, we will also replace the outputTxHash (which is not a unique identifier of a tx) with an outputTxID (which is a unique identifier of a tx)
 inputs = open("inputs.csv", "r")
 inputs.readline() # skip first line, which is just column names
 outputs = open("outputs.csv", "r")
@@ -119,7 +129,7 @@ outputsDict = dict()
 gc.collect()
 
 
-# now we're going to go through a second time, inserting inputs' information into their corresponding outputs
+# now we're going to go through the inputs and outputs a second time, inserting each input's txID and index into its corresponding outputs
 newInputs = open("newInputs.csv", "r")
 newInputs.readline() # skip first line, which is just column names
 outputs = open("outputs.csv", "r")
