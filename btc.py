@@ -79,7 +79,7 @@ inputs = open("inputs.csv", "r")
 inputs.readline() # skip first line, which is just column names
 outputs = open("outputs.csv", "r")
 outputs.readline() # skip first line, which is just column names
-newInputs = open("newinputs.csv", "w")
+newInputs = open("newInputs.csv", "w")
 outputsDict = dict()  # key is output's txHash + "," +  output's index, value is the tuple (output's txID, receiving address) for each output with this txHash and index
 
 for line in outputs:
@@ -95,7 +95,7 @@ for line in outputs:
 
 for line in inputs:
     data = parseInput(line)
-    outputIDIndex = data[3] + "," + data[4]  # used as the index for outputsDict
+    outputIDIndex = data[3] + "," + data[4][:-1]  # used as the index for outputsDict ([:-1] removes newline from data[4])
     if outputIDIndex not in outputsDict:
         raise Exception("input index " + data[1] + " from transaction ID " + data[0] + " calls an output that does not exist in outputsDict  -==-  attempted index: " + data[3] + "," + data[4]) 
     if len(outputsDict[outputIDIndex]) == 0:
@@ -104,7 +104,6 @@ for line in inputs:
     data[3] = outputTxID  # replacing the outputTxHash with an outputTxID
     txHash = txHashes[int(data[0])]
     data.insert(1, txHash)
-    address = outputsDict[ outputTxID + "," + data[4] ]
     data.insert(3, address)
     newInputs.write(",".join(data))
 
