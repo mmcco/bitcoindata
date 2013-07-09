@@ -125,7 +125,7 @@ outputs.close()
 newInputs.close()
 
 # attempting to manually clear memory, as the garbage collector doesn't seem to be doing so
-outputsDict = dict()
+del outputsDict
 gc.collect()
 
 
@@ -146,7 +146,7 @@ for line in outputs:
     # if there's a corresponding input, this output has been spent
     if data[0] + "," + data[1] in inputsDict:
         # insert the input values into inputTxID and inputIndex
-        inputTxID, inputIndex = inputsDict[ data[0] + "," + data[2] ].split(",")
+        inputTxID, inputIndex = inputsDict[ data[0] + "," + data[1] ].split(",")
     else:
         # otherwise the output hasn't been spent yet, so use null values for the corresponding input
         inputTxID = ""
