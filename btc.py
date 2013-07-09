@@ -32,7 +32,7 @@ for line in blocks:
     if int(data[0]) != len(blockTimes):
         raise Exception("mismatch between blockID (" + data[0] + ") and blockTimes list length " + str(len(blockTimes)) + ")")
 
-    timestamp = calendar.timegm(parse(data[3][1:][:-1]).utctimetuple())  # convert ISO 8601 timestamp to Unix timestamp
+    timestamp = calendar.timegm(parse(data[3][1:-1]).utctimetuple())  # convert ISO 8601 timestamp to Unix timestamp
     blockTimes.append(str(timestamp))
     data[3] = str(timestamp)
     newBlocks.write(",".join(data))
@@ -108,7 +108,7 @@ for line in outputs:
 
 for line in inputs:
     data = parseInput(line)
-    outputIDIndex = data[3] + "," + data[4][:-1]  # used as the index for outputsDict ([:-1] removes newline from data[4])
+    outputIDIndex = data[3] + "," + newlineTrim(data[4])  # used as the index for outputsDict
     if outputIDIndex not in outputsDict:
         raise Exception("input index " + data[1] + " from transaction ID " + data[0] + " calls an output that does not exist in outputsDict  -==-  attempted index: " + data[3] + "," + data[4]) 
     if len(outputsDict[outputIDIndex]) == 0:
@@ -139,7 +139,7 @@ inputsDict = dict()  # key is output txID + "," + output index, value is input's
 
 for line in newInputs:
     data = parseInput(line)
-    inputsDict[ data[5] + "," + newlineTrim(data[6]) ] = data[0] + "," + data[2]  # [:-1] removes newline from data[6]
+    inputsDict[ data[5] + "," + newlineTrim(data[6]) ] = data[0] + "," + data[2]
 
 for line in outputs:
     data = parseOutput(line)
