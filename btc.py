@@ -131,7 +131,6 @@ gc.collect()
 
 # now we're going to go through the inputs and outputs a second time, inserting each input's txID and index into its corresponding outputs
 newInputs = open("newInputs.csv", "r")
-newInputs.readline() # skip first line, which is just column names
 outputs = open("outputs.csv", "r")
 outputs.readline() # skip first line, which is just column names
 newOutputs = open("newOutputs.csv", "w")
