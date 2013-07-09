@@ -79,10 +79,10 @@ def parseOutput(outputLine):
     return data
 
 def newlineTrim(string):
-    if string[-1] == '\n':
-        return string[:-1]
-    else:
+    if len(string) == 0 or string[-1] != '\n':
         return string
+    else:
+        return string[:-1]
 
 
 # we will first get the addresses from the outputs and insert them into the inputs
@@ -139,14 +139,14 @@ inputsDict = dict()  # key is output txID + "," + output index, value is input's
 
 for line in newInputs:
     data = parseInput(line)
-    inputsDict[ data[5] + "," + data[6][:-1] ] = data[0] + "," + data[2]  # [:-1] removes newline from data[6]
+    inputsDict[ data[5] + "," + newlineTrim(data[6]) ] = data[0] + "," + data[2]  # [:-1] removes newline from data[6]
 
 for line in outputs:
     data = parseOutput(line)
     # if there's a corresponding input, this output has been spent
     if data[0] + "," + data[1] in inputsDict:
         # insert the input values into inputTxID and inputIndex
-        inputTxID, inputIndex = inputsDict[ data[0] + "," + data[1] ].split(",")
+        inputTxID, inputIndex = inputsDict[ data[0] + "," + data[2] ].split(",")
     else:
         # otherwise the output hasn't been spent yet, so use null values for the corresponding input
         inputTxID = ""
