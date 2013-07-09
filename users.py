@@ -5,31 +5,35 @@ def parseInput(inputLine):
         raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine + "  -==- length of parsed input line is " + str(len(data)))
     return data
 
+
 def resizeTxs(txID):
     for i in range(0, txID):
         txs.append([])
 
-# helper function that walks to the root and returns its key
+
+# returns the given addresses's root and rank in a tuple
 def getRoot(addr):
     rank = 1
     while addresses[addr] != None:
         addr = addresses[addr]
         rank += 1
-    return (addresses[addr], rank)
+    return (addr, rank)
 
 
 # helper function, returns whether all items in a list are equal
 def areAllEqual(args):
+
     for i in range (0, len(args) - 1):
         if args[i] != args[i+1]:
             return False
 
     return True
 
+
 def union(args):
 
     if len(args) < 2:
-        raise Exception("union() passed a list of length < 2  -==-  list: " + args)
+        raise Exception("union() passed a list of length < 2")
 
     rootInfo = map (getRoot, args)  # contains both root address and rank
     roots = [i[0] for i in rootInfo]
@@ -74,20 +78,21 @@ for tx in txs:
         union(tx)
 
 
-i = 0
-for i in range(0, len(txs)):
-    if txs[i] != []:
-        i += 1
-    else:
-        break
-
-print "len(txs): " + str(i)
 print "len(addresses): " + str(len(addresses))
-#users = dict() # associates users' address sets with their roots
-#
-#for key, value in addresses.iteritems():
-#    
-#    if not value in users:
-#        users[value] = []
-#
-#    users[value].append(key)
+
+
+usersDict = dict() # associates users' address sets with their roots
+
+for key, value in addresses.iteritems():
+    
+    if not value in usersDict:
+        usersDict[value] = [key]
+
+    else:
+        usersDict[value].append(key)
+
+# generate a list of addresses, each index being a user, from usersDict
+users = []
+
+for key, value in usersDict.iteritems():
+    users.append(value)
