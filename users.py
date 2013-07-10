@@ -13,7 +13,7 @@ def parseInput(inputLine):
 
 def resizeTxs(count):
     for i in range(0, count):
-        txs.append([])
+        txs.append(set())
 
 
 # returns the given addresses's root and rank in a tuple
@@ -26,36 +26,36 @@ def getRoot(addr):
         return root
 
 
-# helper function, returns whether all items in a list are equal
-def areAllEqual(args):
-
-    for i in range (0, len(args) - 1):
-        if args[i] != args[i+1]:
-            return False
-
-    return True
-
 def union(args):
     
     if len(args) < 2:
         raise Exception("union() passed a list of length < 2")
 
-    roots = map (getRoot, args)
-    ranks = [(addr, addresses[root]) for root in roots]
-    parent = max (ranks, key = (lambda x: x[1]))
-    # make everyone point to the root
-    for root in roots:
-        addresses[root] = addresses[parent[0]]
+    roots = set(map (getRoot, args))
+
+    # if the roots are already equal, we're done
+    if len(roots) == 1:
+        return
+
+    rootRanks = [(root, addresses[root]) for root in roots]
+    parent = max (rootRanks, key = (lambda x: x[1]))
+    rootRanks.remove(parent)
+    # make everyone child root point to the parent root
+    for child in rootRanks:
+        addresses[child[0]] = parent[0]
     
-    ranks.remove(parent)
     # increment the root's rank if we're connecting a tree of equal rank
-    for childRoot in ranks:
-        if childRoot[1] == parent[1]:
+    if type(addresses[parent[0]]) != int:
+        raise Exception(parent[0] + " was used as a parent, but its dict value is " + addresses[parent[0]] + " which is not of type int")
+    for child in rootRanks:
+        if child[1] == parent[1]:
             addresses[parent[0]] += 1
             break
+        elif child[1] > parent[1]:
+            raise Exception("parent selected did not have the highest rank")
 
 
-txs = [[]]  # index is txID, value is a list of its inputs' addresses
+txs = [set()]  # index is txID, value is a list of its inputs' addresses
 inputs = open("newInputs.csv", "r")
 
 print "beginning loading addresses into dictionary by transaction"
@@ -68,7 +68,7 @@ for line in inputs:
     txID = int(data[0])
     if len(txs) <= txID:
         resizeTxs(txID)
-    txs[txID].append(data[3])
+    txs[txID].add(data[3])
 
     numInputs += 1
     
@@ -79,10 +79,10 @@ lastTime = time.time()
 
 addresses = dict() # associates address with user
 
-# populate addresses dict, making an index of value None for each address
+# populate addresses dict, making an index of value 0 for each address
 for tx in txs:
     for addr in tx:
-        addresses[addr] = None
+        addresses[addr] = 0
 
 print "creating union dictionary took " + str(time.time() - lastTime) + " seconds"
 print "number of addresses: " + str(len(addresses))
@@ -95,22 +95,20 @@ for tx in txs:
 
 print "union-find took " + str(time.time() - lastTime) + " seconds"
 lastTime = time.time()
-print "merging all uses into a dictionary"
+print "merging all users into a dictionary"
 
 usersDict = dict() # associates users' address sets with their roots
 
 for key, value in addresses.iteritems():
     
-    if value is None:
-        root = key
-    else:
-        root = getRoot(value)[0]
+    while type(addresses[key]) != int:
+        key = addresses[key]
 
-    if not root in usersDict:
-        usersDict[root] = [key]
+    if not key in usersDict:
+        usersDict[key] = [key]
 
     else:
-        usersDict[root].append(key)
+        usersDict[key].append(key)
 
 print "merging users into dictionary took " + str(time.time() - lastTime) + " seconds"
 lastTime = time.time()
