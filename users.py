@@ -18,13 +18,12 @@ def resizeTxs(count):
 
 # returns the given addresses's root and rank in a tuple
 def getRoot(addr):
-
-    rank = 1
-    while addresses[addr] is not None:
-        addr = addresses[addr]
-        rank += 1
-
-    return (addr, rank)
+    if type(addresses[addr]) == int:
+        return addr
+    else:
+        root = getRoot(addresses[addr])
+        addresses[addr] = root
+        return root
 
 
 # helper function, returns whether all items in a list are equal
@@ -36,30 +35,24 @@ def areAllEqual(args):
 
     return True
 
-
 def union(args):
-
+    
     if len(args) < 2:
         raise Exception("union() passed a list of length < 2")
 
-    rootInfo = map (getRoot, args)  # contains both root address and rank
-    roots = [i[0] for i in rootInfo]
-    ranks = [i[1] for i in rootInfo]
-
-    # if they already have the same root, we're done
-    if areAllEqual(roots):
-        return
-
-    # select the root with the highest rank as the parent
-    maxRank = 0
-    for root in rootInfo:
-        if root[1] > maxRank:
-            parent = root
-            maxRank = root[1]
+    roots = map (getRoot, args)
+    ranks = [(addr, addresses[root]) for root in roots]
+    parent = max (ranks, key = (lambda x: x[1]))
+    # make everyone point to the root
+    for root in roots:
+        addresses[root] = addresses[parent[0]]
     
-    # make everyone point to the parent
-    for addr in roots:
-        addresses[addr] = parent[0]
+    ranks.remove(parent)
+    # increment the root's rank if we're connecting a tree of equal rank
+    for childRoot in ranks:
+        if childRoot[1] == parent[1]:
+            addresses[parent[0]] += 1
+            break
 
 
 txs = [[]]  # index is txID, value is a list of its inputs' addresses

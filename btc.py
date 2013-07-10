@@ -16,7 +16,6 @@
 from dateutil.parser import parse
 import calendar
 import datetime
-import gc
 
 # we begin by converting each block's timestamp from ISO 8601 to a Unix timestamp
 blocks = open("blocks.csv", "r")
@@ -123,10 +122,6 @@ for line in inputs:
 inputs.close()
 outputs.close()
 newInputs.close()
-
-# attempting to manually clear memory, as the garbage collector doesn't seem to be doing so
-del outputsDict
-gc.collect()
 
 
 # now we're going to go through the inputs and outputs a second time, inserting each input's txID and index into its corresponding outputs
