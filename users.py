@@ -101,7 +101,7 @@ usersDict = dict() # associates users' address sets with their roots
 
 for key, value in addresses.iteritems():
     
-    root = addresses[key] if type(addresses[key]) != int else key
+    root = key
     while type(addresses[root]) != int:
         root = addresses[root]
 
