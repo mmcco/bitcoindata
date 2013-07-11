@@ -101,14 +101,15 @@ usersDict = dict() # associates users' address sets with their roots
 
 for key, value in addresses.iteritems():
     
-    while type(addresses[key]) != int:
-        key = addresses[key]
+    root = addresses[key] if type(addresses[key]) != int else key
+    while type(addresses[root]) != int:
+        root = addresses[root]
 
-    if not key in usersDict:
-        usersDict[key] = [key]
+    if not root in usersDict:
+        usersDict[root] = set([key])
 
     else:
-        usersDict[key].append(key)
+        usersDict[root].add(key)
 
 print "merging users into dictionary took " + str(time.time() - lastTime) + " seconds"
 lastTime = time.time()
@@ -123,3 +124,11 @@ for key, value in usersDict.iteritems():
 
 print "converting dictionary into list took " + str(time.time() - lastTime) + " seconds"
 print "user generation completed"
+
+userFile = open("users.csv", "w")
+
+for counter, user in enumerate(users):
+    for addr in user:
+        userFile.write(str(counter) + "," + addr + "\n")
+
+userFile.close()
