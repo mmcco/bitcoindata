@@ -1,24 +1,29 @@
-import time
+import itertools
 
-lastTime = time.time()
-
+# returns an input's txID and address in a tuple
 def parseInput(inputLine):
-
-    data = inputLine.split(",")
+    data = inputLine.split(",", 4)
     # remember, this is only meant to parse newInputs.csv, not inputs.csv
-    if len(data) != 7:
+    if len(data) != 5:
         raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine + "  -==-  length of parsed input line is " + str(len(data)))
-    return data
+    return (data[0], data[3])
 
+# returns an output's txID and address in a tuple
+def parseOutput(line):
+    data = line.split(",", 6)
+    if len(data) != 7:
+        raise Exception("bad line in newOutputs.csv")
+    return (data[0], data[5])
 
 # helper function for dynamic resize of two-dimensional array
 def resizeTxs(count):
     for i in range(0, count):
-        txs.append(set())
+        inputTxs.append(set())
 
+# same as above but for another 2D array
 def resizeOutputTxs(count):
     for i in range(0, count):
-        txs.append(set())
+        outputTxs.append(set())
 
 # returns the given addresses's root and rank in a tuple
 def getRoot(addr):
@@ -28,7 +33,6 @@ def getRoot(addr):
         root = getRoot(addresses[addr])
         addresses[addr] = root
         return root
-
 
 def union(args):
     
@@ -58,58 +62,9 @@ def union(args):
         elif child[1] > parent[1]:
             raise Exception("parent selected did not have the highest rank")
 
+    # add addresses to list of used addresses
+    map (usedAddresses.add, args)
 
-txs = [set()]  # index is txID, value is a list of its inputs' addresses
-inputs = open("newInputs.csv", "r")
-
-print "beginning loading addresses into dictionary by transaction"
-numInputs = 0
-
-# fill a dict with a key for each address
-for line in inputs:
-
-    data = parseInput(line)
-    txID = int(data[0])
-    if len(txs) <= txID:
-        resizeTxs(txID)
-    txs[txID].add(data[3])
-
-    numInputs += 1
-    
-print "dictionary load took " + str(time.time() - lastTime) + " seconds"
-print str(numInputs) + " inputs were processed"
-print "creating dictionary of addresses, initializing roots"
-lastTime = time.time()
-
-addresses = dict() # associates address with user
-
-# populate addresses dict, making an index of value 0 for each address
-for tx in txs:
-    for addr in tx:
-        addresses[addr] = 0
-
-print "creating union dictionary took " + str(time.time() - lastTime) + " seconds"
-print "number of addresses: " + str(len(addresses))
-lastTime = time.time()
-print "beginning union-find on addresses"
-
-for tx in txs:
-    if len(tx) > 1:
-        union(tx)
-
-print "union-find took " + str(time.time() - lastTime) + " seconds"
-lastTime = time.time()
-print "merging all users into a dictionary"
-
-
-# we will now begin unioning addresses based on the new output heuristic
-
-# returns an output's txID and address in a tuple
-def parseOutput(line):
-    data = line.split(",", 6)
-    if len(data) != 7:
-        raise Exception("bad line in newOutputs.csv")
-    return (data[0], data[5])
 
 # takes the addresses in a tx's outputs, conditionally unions them
 def outputUnion(args, txID):
@@ -127,7 +82,7 @@ def outputUnion(args, txID):
             addr = tup[0]
             executeUnion = True
         # logic for second unused address encountered
-        if [tup[1] and executeUnion:
+        if tup[1] and executeUnion:
             executeUnion = False
 
     if not executeUnion:
@@ -135,20 +90,34 @@ def outputUnion(args, txID):
 
     else:
         # if there are no inputs for this hash, its a block reward and we can't union
-        if len(txs[txID] == 0):
+        if len(inputTxs[txID] == 0):
             return
         # otherwise, we union to the first input address
         # all the input addresses are already unioned, so we only need to use one
         else:
-            union([txs[0], addr])
+            union([inputTxs[0], addr])
 
-# stores addresses that have already been used
-usedAddresses = set()
+    # add args to list of used addresses
+    map (usedAddresses.add, args)
 
-usersDict = dict() # associates users' address sets with their roots
+
+inputTxs = [set()]  # index is txID, value is a list of its inputs' addresses
+outputTxs = [[]]  # same as above but for outputs
+inputs = open("newInputs.csv", "r")
+
+# fill a dict with a key for each address
+for line in inputs:
+
+    data = parseInput(line)
+    txID = int(data[0])
+    if len(inputTxs) <= txID:
+        resizeTxs(txID)
+    inputTxs[txID].add(data[3])
+
+inputs.close()
 
 outputs = open("newOutputs.csv", "r")  # the heuristic uses outputs
-outputTxs = [[]]
+
 for line in outputs:
     txID, address = parseOutput(line)
     txID = int(txID)
@@ -156,9 +125,52 @@ for line in outputs:
         resizeOutputTxs(txID)
     outputTxs[txID].add(address)
 
-for counter, tx in enumerate(outputTxs):
-    if len(tx) > 1:
-        outputUnion(tx, counter)
+outputs.close()
+    
+addresses = dict() # associates address with user
+
+# populate addresses dict, making an index of value 0 for each address
+for tx in inputTxs:
+    for addr in tx:
+        addresses[addr] = 0
+
+if len(inputTxs) != len(outputTxs):
+    raise Exception("inputTxs and outputTxs are not of the same length")
+txs = zip(itertools.count(), inputTxs, outputTxs)
+
+# stores addresses that have already been used
+usedAddresses = set()
+
+for tx in txs:
+
+    txID = tx[0]
+    inputs = tx[1]
+    outputs = tx[2]
+
+    # if there are no inputs then it's a block reward, and can't be unioned
+    if len(inputs) == 0:
+        continue
+    
+    # if there is only one input and one output, no unions can be made
+    elif len(inputs) < 2 and len(outputs) < 2:
+        continue
+
+    # if there are multiple inputs but only one output, we can only union the inputs
+    elif len(inputs) > 1 and len(outputs) < 2:
+        union(inputs)
+
+    # if there is exactly one input and multiple outputs, call outputUnion() only
+    # this works because outputUnion() conditionally unions the lone output with the first input
+    elif len(inputs) == 1 and len(outputs) > 1:
+        outputUnion(outputs, txID)
+
+    # if there are multiple inputs and multiple outputs, we union both
+    elif len(inputs) > 1 and len(outputs) > 1:
+        union(inputs)
+        outputUnion(outputs, txID)
+
+
+usersDict = dict() # associates users' address sets with their roots
 
 for key, value in addresses.iteritems():
     
@@ -172,19 +184,11 @@ for key, value in addresses.iteritems():
     else:
         usersDict[root].add(key)
 
-print "merging users into dictionary took " + str(time.time() - lastTime) + " seconds"
-lastTime = time.time()
-print "number of users in dictionary: " + str(len(usersDict))
-print "converting users dictionary into a list"
-
 # generate a list of addresses, each index being a user, from usersDict
 users = []
 
 for key, value in usersDict.iteritems():
     users.append(value)
-
-print "converting dictionary into list took " + str(time.time() - lastTime) + " seconds"
-print "user generation completed"
 
 userFile = open("heurusers.csv", "w")
 
