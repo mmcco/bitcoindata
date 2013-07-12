@@ -129,6 +129,6 @@ userFile = open("users.csv", "w")
 
 for counter, user in enumerate(users):
     for addr in user:
-        userFile.write(str(counter) + "," + addr + "\n")
+        userFile.write(addr + "," + str(counter) + "\n")
 
 userFile.close()
