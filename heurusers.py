@@ -1,3 +1,10 @@
+# This script merges addresses into users, which are entities suspected of owning multiple addresses
+# It uses the traditional heuristic of assuming the addresses associated with each transaction's inputs are owned by the same user
+# It also uses an additional heuristic which has not yet been published
+# Specifically, if a transaction has multiple outputs, exactly one of which goes to an unused address, that address is unioned with the input addresses
+
+# note that union() must be called before outputUnion()
+
 import itertools
 
 # returns an input's txID and address in a tuple
@@ -34,10 +41,15 @@ def getRoot(addr):
         addresses[addr] = root
         return root
 
+# executes union-find on a tx's inputs
 def union(args):
     
     if len(args) < 2:
         raise Exception("union() passed a list of length < 2")
+
+    for addr in args:
+        if addr not in addresses:
+            raise Exception(addr, "is passed to union() but does not exist in the addresses dict")
 
     roots = set(map (getRoot, args))
 
@@ -62,14 +74,25 @@ def union(args):
         elif child[1] > parent[1]:
             raise Exception("parent selected did not have the highest rank")
 
-    # add addresses to list of used addresses
-    map (usedAddresses.add, args)
+# returns a list of all addresses, including ones that never spend
+def getAddresses():
+    tempOutputs = open("newOutputs.csv", "r")
+    addressList = []
+    for line in tempOutputs:
+        data = line.split(",", 6)
+        addressList.append(data[5])
+    return addressList
 
 
 # takes the addresses in a tx's outputs, conditionally unions them
 def outputUnion(args, txID):
     if len(args) < 2:
         raise Exception("outputUnion was passed a set of length < 2")
+    
+    for addr in args:
+        if addr not in addresses:
+            raise Exception(addr, "is passed to outputUnion() but does not exist in the addresses dict")
+
     # generate a list of tuples associating each address with a boolean that describes whether it has been used yet
     boolTuples = [(addr, addr in usedAddresses) for addr in args]
     
@@ -102,23 +125,24 @@ def outputUnion(args, txID):
 
 
 inputTxs = [set()]  # index is txID, value is a list of its inputs' addresses
-outputTxs = [[]]  # same as above but for outputs
+outputTxs = [set()]  # same as above but for outputs
 inputs = open("newInputs.csv", "r")
 
 # fill a dict with a key for each address
 for line in inputs:
 
-    data = parseInput(line)
-    txID = int(data[0])
+    txID, address = parseInput(line)
+    txID = int(txID)
     if len(inputTxs) <= txID:
         resizeTxs(txID)
-    inputTxs[txID].add(data[3])
+    inputTxs[txID].add(address)
 
 inputs.close()
 
-outputs = open("newOutputs.csv", "r")  # the heuristic uses outputs
+outputs = open("newOutputs.csv", "r")  # the new heuristic uses outputs
 
 for line in outputs:
+
     txID, address = parseOutput(line)
     txID = int(txID)
     if len(outputTxs) <= txID:
@@ -130,9 +154,8 @@ outputs.close()
 addresses = dict() # associates address with user
 
 # populate addresses dict, making an index of value 0 for each address
-for tx in inputTxs:
-    for addr in tx:
-        addresses[addr] = 0
+for address in getAddresses():
+    addresses[address] = 0
 
 if len(inputTxs) != len(outputTxs):
     raise Exception("inputTxs and outputTxs are not of the same length")

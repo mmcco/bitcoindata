@@ -54,6 +54,15 @@ def union(args):
         elif child[1] > parent[1]:
             raise Exception("parent selected did not have the highest rank")
 
+# returns a list of all addresses, including ones that never spend
+def getAddresses():
+    tempOutputs = open("newOutputs.csv", "r")
+    addressList = []
+    for line in tempOutputs:
+        data = line.split(",", 6)
+        addressList.append(data[5])
+    return addressList
+
 
 txs = [set()]  # index is txID, value is a list of its inputs' addresses
 inputs = open("newInputs.csv", "r")
@@ -80,9 +89,8 @@ lastTime = time.time()
 addresses = dict() # associates address with user
 
 # populate addresses dict, making an index of value 0 for each address
-for tx in txs:
-    for addr in tx:
-        addresses[addr] = 0
+for address in getAddresses():
+    addresses[address] = 0
 
 print "creating union dictionary took " + str(time.time() - lastTime) + " seconds"
 print "number of addresses: " + str(len(addresses))
