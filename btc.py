@@ -62,6 +62,7 @@ txs.close()
 newTxs.close()
 
 
+# parses a CSV line from inputs.csv or newInputs.csv
 def parseInput(inputLine):
     data = inputLine.split(",")
     # allow data to be of length 5 or 7 because this function is used to parse both inputs.csv and newInputs.csv
@@ -69,13 +70,13 @@ def parseInput(inputLine):
         raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine)
     return data
 
+# parses a CSV line from outputs.csv
 def parseOutput(outputLine):
     data = outputLine.split(",", 5)
-    # throw out the last item in data, it's just ",,"  !!! REMEMBER that this takes the newline off, so you have to add it manually when writing
-    data = data[:-1]
-    if len(data) != 5:
+    if len(data) != 6:
         raise Exception("bad line in outputs.csv - cannot parse  -==-  " + outputLine)
-    return data
+    # drop the end of the line, as it's just trailing commas
+    return data[:5]
 
 def newlineTrim(string):
     if len(string) == 0 or string[-1] != '\n':
@@ -96,25 +97,29 @@ outputsDict = dict()  # key is output's txHash + "," +  output's index, value is
 
 for line in outputs:
     data = parseOutput(line)
-    if int(data[0]) >= len(txHashes):
-        raise Exception("output txID " + data[0] + " is outside the range available in txHashes  -==-  maximum available txID is " + str(len(txHashes)))
-    txHash = txHashes[int(data[0])]
-    dictIndex = txHash + "," + data[1]
+    txID, index, address = data[0], data[1], data[4]
+    if int(txID) >= len(txHashes):
+        raise Exception("output txID " + txID + " is outside the range available in txHashes  -==-  maximum available txID is " + str(len(txHashes)))
+    txHash = txHashes[int(txID)]
+    dictIndex = txHash + "," + index
+    # allow for multiple values in each outputsDict location because txHashes are not unique identifiers of txs
+    # in accordance with the Bitcoin protocol, each outputsDict location is a queue
     if dictIndex not in outputsDict:
-        outputsDict[dictIndex] = [(data[0], data[4])]
+        outputsDict[dictIndex] = [(txID, address)]
     else:
-        outputsDict[dictIndex].append( (data[0], data[4]) )
+        outputsDict[dictIndex].append( (txID, address) )
 
 for line in inputs:
     data = parseInput(line)
-    outputIDIndex = data[3] + "," + newlineTrim(data[4])  # used as the index for outputsDict
-    if outputIDIndex not in outputsDict:
-        raise Exception("input index " + data[1] + " from transaction ID " + data[0] + " calls an output that does not exist in outputsDict  -==-  attempted index: " + data[3] + "," + data[4]) 
-    if len(outputsDict[outputIDIndex]) == 0:
-        raise Exception("the output for input index " + data[1] + "from transaction ID " + data[0] + "has already been used")
-    outputTxID, address = outputsDict[outputIDIndex].pop(0) # the oldest output is the one that has to be used first, according to the protocol
+    txID, index, outputTxHash, outputTxIndex = data[0], data[1], data[3], data[4]
+    outputsDictKey = outputTxHash + "," + newlineTrim(outputTxIndex)  # used as the index for outputsDict
+    if outputsDictKey not in outputsDict:
+        raise Exception("input index " + index + " from transaction ID " + txID + " calls an output that does not exist in outputsDict  -==-  attempted index: " + outputTxHash + "," + outputTxIndex) 
+    if len(outputsDict[outputsDictKey]) == 0:
+        raise Exception("the output for input index " + index + "from transaction ID " + txID + "has already been used")
+    outputTxID, address = outputsDict[outputsDictKey].pop(0) # the oldest output is the one that has to be used first, according to the protocol
+    txHash = txHashes[int(txID)]
     data[3] = outputTxID  # replacing the outputTxHash with an outputTxID
-    txHash = txHashes[int(data[0])]
     data.insert(1, txHash)
     data.insert(3, address)
     newInputs.write(",".join(data))
@@ -133,19 +138,22 @@ inputsDict = dict()  # key is output txID + "," + output index, value is input's
 
 for line in newInputs:
     data = parseInput(line)
-    inputsDict[ data[5] + "," + newlineTrim(data[6]) ] = data[0] + "," + data[2]
+    txID, index, outputTxHash, outputTxIndex
+    inputsDict[ outputTxHash + "," + newlineTrim(outputTxIndex) ] = txID + "," + index
 
 for line in outputs:
     data = parseOutput(line)
+    txID, index = data[0], data[1]
     # if there's a corresponding input, this output has been spent
-    if data[0] + "," + data[1] in inputsDict:
+    if txID + "," + index in inputsDict:
         # insert the input values into inputTxID and inputIndex
-        inputTxID, inputIndex = inputsDict[ data[0] + "," + data[1] ].split(",")
+        inputTxID, inputIndex = inputsDict[ txID + "," + index ].split(",")
+    # otherwise the output hasn't been spent yet...
     else:
-        # otherwise the output hasn't been spent yet, so use null values for the corresponding input
+        # ...so use empty values for the corresponding input
         inputTxID = ""
         inputIndex = ""
-    txHash = txHashes[ int(data[0]) ]
+    txHash = txHashes[ int(txID) ]
     data.insert(1, txHash)
     data.append(inputTxID)
     data.append(inputIndex)
