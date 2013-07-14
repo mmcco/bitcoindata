@@ -209,14 +209,10 @@ for key, value in addresses.iteritems():
 
 # generate a list of addresses, each index being a user, from usersDict
 users = []
-
-for key, value in usersDict.iteritems():
-    users.append(value)
-
 userFile = open("heurusers.csv", "w")
 
-for counter, user in enumerate(users):
-    for addr in user:
-        userFile.write(addr + "," + str(counter) + "\n")
+for counter, (key, user) in enumerate(usersDict):
+    for address in user:
+        userFile.write(address + "," + str(counter) + "\n")
 
 userFile.close()
