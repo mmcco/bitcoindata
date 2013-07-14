@@ -1,26 +1,31 @@
-import time
+# This script generates a CSV file associating Bitcoin addresses based on the entity that is suspected to own them
+# It uses the classic heuristic of assuming all addresses owning inputs to a transaction are owned by the same entity
+# This is carried out using the union-find algorithm
 
+# note that sets are used heavily - they're somewhat slower than lists but are more bug-resistant
+# if you're looking to make performance improvements, convert sets to lists where possible
+
+import time
 lastTime = time.time()
 
+# parses a CSV line from newInputs.csv
 def parseInput(inputLine):
-
     data = inputLine.split(",")
     # remember, this is only meant to parse newInputs.csv, not inputs.csv
     if len(data) != 7:
         raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine + "  -==-  length of parsed input line is " + str(len(data)))
     return data
 
-
 def resizeTxs(count):
     for i in range(0, count):
         txs.append(set())
-
 
 # returns the given addresses's root and rank in a tuple
 def getRoot(addr):
     if type(addresses[addr]) == int:
         return addr
     else:
+        # three-step technique used for path compression
         root = getRoot(addresses[addr])
         addresses[addr] = root
         return root
@@ -37,31 +42,29 @@ def union(args):
     if len(roots) == 1:
         return
 
-    rootRanks = [(root, addresses[root]) for root in roots]
-    parent = max (rootRanks, key = (lambda x: x[1]))
-    rootRanks.remove(parent)
+    rootTuple = [(root, addresses[root]) for root in roots]
+    parent = max (rootTuple, key = (lambda x: x[1]))
+    rootTuple.remove(parent)
     # make everyone child root point to the parent root
-    for child in rootRanks:
+    for child in rootTuple:
         addresses[child[0]] = parent[0]
     
     # increment the root's rank if we're connecting a tree of equal rank
-    if type(addresses[parent[0]]) != int:
-        raise Exception(parent[0] + " was used as a parent, but its dict value is " + addresses[parent[0]] + " which is not of type int")
-    for child in rootRanks:
+    for child in rootTuple:
         if child[1] == parent[1]:
             addresses[parent[0]] += 1
             break
         elif child[1] > parent[1]:
             raise Exception("parent selected did not have the highest rank")
 
-# returns a list of all addresses, including ones that never spend
+# returns a set of all addresses, including ones that never spend
 def getAddresses():
     tempOutputs = open("newOutputs.csv", "r")
-    addressList = []
+    addressSet = set()
     for line in tempOutputs:
         data = line.split(",", 6)
-        addressList.append(data[5])
-    return addressList
+        addressSet.add(data[5])
+    return addressSet
 
 
 txs = [set()]  # index is txID, value is a list of its inputs' addresses
@@ -74,10 +77,10 @@ numInputs = 0
 for line in inputs:
 
     data = parseInput(line)
-    txID = int(data[0])
+    txID, address = int(data[0]), data[3]
     if len(txs) <= txID:
         resizeTxs(txID)
-    txs[txID].add(data[3])
+    txs[txID].add(address)
 
     numInputs += 1
     
