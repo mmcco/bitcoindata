@@ -64,6 +64,7 @@ def getAddresses():
     for line in tempOutputs:
         data = line.split(",", 6)
         addressSet.add(data[5])
+    tempOutputs.close()
     return addressSet
 
 
@@ -83,6 +84,8 @@ for line in inputs:
     txs[txID].add(address)
 
     numInputs += 1
+
+inputs.close()
     
 print "dictionary load took " + str(time.time() - lastTime) + " seconds"
 print str(numInputs) + " inputs were processed"
@@ -127,19 +130,12 @@ lastTime = time.time()
 print "number of users in dictionary: " + str(len(usersDict))
 print "converting users dictionary into a list"
 
-# generate a list of addresses, each index being a user, from usersDict
+# write each user to a CSV file
+userFile = open("users.csv", "w")
 users = []
 
-for key, value in usersDict.iteritems():
-    users.append(value)
-
-print "converting dictionary into list took " + str(time.time() - lastTime) + " seconds"
-print "user generation completed"
-
-userFile = open("users.csv", "w")
-
-for counter, user in enumerate(users):
-    for addr in user:
-        userFile.write(addr + "," + str(counter) + "\n")
+for counter, (key, user) in enumerate(usersDict.iteritems()):
+    for address in user:
+        userFile.write(address + "," + str(counter) + "\n")
 
 userFile.close()
