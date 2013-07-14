@@ -1,3 +1,5 @@
+### !!! This script is deprecated, as its functionality is included in btc.py !!! ###
+
 # this script takes CSV files of inputs and outputs that have already been passed through getHashes.py
 # it fills the inputTxHash and inputTxIndex fields in the outputs
 # the third argument is the file to which the new outputs CSV will be saved

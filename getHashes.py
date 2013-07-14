@@ -1,3 +1,5 @@
+### !!! This script is deprecated, as its functionality is included in btc.py !!! ###
+
 from sys import argv
 # takes the following arguments in order:
 txs = open(argv[1], "r")
