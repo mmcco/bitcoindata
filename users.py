@@ -5,9 +5,6 @@
 # note that sets are used heavily - they're somewhat slower than lists but are more bug-resistant
 # if you're looking to make performance improvements, convert sets to lists where possible
 
-import time
-lastTime = time.time()
-
 # parses a CSV line from newInputs.csv
 def parseInput(inputLine):
     data = inputLine.split(",")
@@ -71,9 +68,6 @@ def getAddresses():
 txs = [set()]  # index is txID, value is a list of its inputs' addresses
 inputs = open("newInputs.csv", "r")
 
-print "beginning loading addresses into dictionary by transaction"
-numInputs = 0
-
 # fill a dict with a key for each address
 for line in inputs:
 
@@ -83,14 +77,9 @@ for line in inputs:
         resizeTxs(txID)
     txs[txID].add(address)
 
-    numInputs += 1
-
 inputs.close()
     
-print "dictionary load took " + str(time.time() - lastTime) + " seconds"
-print str(numInputs) + " inputs were processed"
-print "creating dictionary of addresses, initializing roots"
-lastTime = time.time()
+print "list of addresses associated by transaction filled"
 
 addresses = dict() # associates address with user
 
@@ -98,18 +87,13 @@ addresses = dict() # associates address with user
 for address in getAddresses():
     addresses[address] = 0
 
-print "creating union dictionary took " + str(time.time() - lastTime) + " seconds"
-print "number of addresses: " + str(len(addresses))
-lastTime = time.time()
-print "beginning union-find on addresses"
+print "dictionary of addresses for union-find filled"
 
 for tx in txs:
     if len(tx) > 1:
         union(tx)
 
-print "union-find took " + str(time.time() - lastTime) + " seconds"
-lastTime = time.time()
-print "merging all users into a dictionary"
+print "union-find completed"
 
 usersDict = dict() # associates users' address sets with their roots
 
@@ -125,10 +109,7 @@ for key, value in addresses.iteritems():
     else:
         usersDict[root].add(key)
 
-print "merging users into dictionary took " + str(time.time() - lastTime) + " seconds"
-lastTime = time.time()
-print "number of users in dictionary: " + str(len(usersDict))
-print "converting users dictionary into a list"
+print "dictionary of users indexed by root populated"
 
 # write each user to a CSV file
 userFile = open("users.csv", "w")
