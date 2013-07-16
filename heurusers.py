@@ -74,14 +74,14 @@ def union(args):
         elif child[1] > parent[1]:
             raise Exception("parent selected did not have the highest rank")
 
-# returns a list of all addresses, including ones that never spend
+# returns a set of all addresses, including ones that never spend
 def getAddresses():
     tempOutputs = open("newOutputs.csv", "r")
-    addressList = []
+    addressSet = set()
     for line in tempOutputs:
         data = line.split(",", 6)
-        addressList.append(data[5])
-    return addressList
+        addressSet.add(data[5])
+    return addressSet
 
 
 # takes the addresses in a tx's outputs, conditionally unions them
