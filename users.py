@@ -113,10 +113,15 @@ print "dictionary of users indexed by root populated"
 
 # write each user to a CSV file
 userFile = open("users.csv", "w")
+countFile = open("usersCount.csv", "w")
 users = []
 
 for counter, (key, user) in enumerate(usersDict.iteritems()):
+    if len(user) == 0:
+        raise Exception("trying to write a user with no addresses")
+    countFile.write(str(counter) + "," + str(len(user)) + '\n')
     for address in user:
         userFile.write(address + "," + str(counter) + "\n")
 
 userFile.close()
+countFile.close()
