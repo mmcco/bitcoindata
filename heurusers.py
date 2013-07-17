@@ -3,7 +3,10 @@
 # It also uses an additional heuristic which has not yet been published
 # Specifically, if a transaction has multiple outputs, exactly one of which goes to an unused address, that address is unioned with the input addresses
 
-# note that union() must be called before outputUnion()
+# union() must be called before outputUnion()
+
+# lists with "if x not in y" checks are used instead of sets where the CPU/memory trade-off makes sense
+# this is because sets are represented as dictionaries in memory and therefore take up a lot of space
 
 import itertools
 
@@ -25,12 +28,12 @@ def parseOutput(line):
 # helper function for dynamic resize of two-dimensional array
 def resizeTxs(count):
     for i in range(0, count):
-        inputTxs.append(set())
+        inputTxs.append([])
 
 # same as above but for another 2D array
 def resizeOutputTxs(count):
     for i in range(0, count):
-        outputTxs.append(set())
+        outputTxs.append([])
 
 # returns the given addresses's root and rank in a tuple
 def getRoot(addr):
@@ -40,6 +43,17 @@ def getRoot(addr):
         root = getRoot(addresses[addr])
         addresses[addr] = root
         return root
+
+# returns a list of all addresses, including ones that never spend
+def getAddresses():
+    tempOutputs = open("newOutputs.csv", "r")
+    addressList = []
+    for line in tempOutputs:
+        data = line.split(",", 6)
+        if data[5] not in addressList:
+            addressList.append(data[5])
+    return addressList
+
 
 # executes union-find on a tx's inputs
 def union(args):
@@ -74,24 +88,16 @@ def union(args):
         elif child[1] > parent[1]:
             raise Exception("parent selected did not have the highest rank")
 
-# returns a set of all addresses, including ones that never spend
-def getAddresses():
-    tempOutputs = open("newOutputs.csv", "r")
-    addressSet = set()
-    for line in tempOutputs:
-        data = line.split(",", 6)
-        addressSet.add(data[5])
-    return addressSet
-
 
 # takes the addresses in a tx's outputs, conditionally unions them
 def outputUnion(args, txID):
     if len(args) < 2:
         raise Exception("outputUnion was passed a set of length < 2")
     
-    for addr in args:
-        if addr not in addresses:
-            raise Exception(addr, "is passed to outputUnion() but does not exist in the addresses dict")
+    # because we are now using lists instead of sets, this check takes too long
+    #for addr in args:
+    #    if addr not in addresses:
+    #        raise Exception(addr, "is passed to outputUnion() but does not exist in the addresses dict")
 
     # generate a list of tuples associating each address with a boolean that describes whether it has been used yet
     boolTuples = [(addr, addr in usedAddresses) for addr in args]
@@ -124,8 +130,8 @@ def outputUnion(args, txID):
     map (usedAddresses.add, args)
 
 
-inputTxs = [set()]  # index is txID, value is a list of its inputs' addresses
-outputTxs = [set()]  # same as above but for outputs
+inputTxs = [[]]  # index is txID, value is a list of its inputs' addresses
+outputTxs = [[]]  # same as above but for outputs
 inputs = open("newInputs.csv", "r")
 
 # fill a dict with a key for each address
@@ -135,9 +141,12 @@ for line in inputs:
     txID = int(txID)
     if len(inputTxs) <= txID:
         resizeTxs(txID)
-    inputTxs[txID].add(address)
+    if address not in inputTxs[txID]:
+        inputTxs[txID].append(address)
 
 inputs.close()
+
+print "inputTxs dict populated"
 
 outputs = open("newOutputs.csv", "r")  # the new heuristic uses outputs
 
@@ -147,9 +156,12 @@ for line in outputs:
     txID = int(txID)
     if len(outputTxs) <= txID:
         resizeOutputTxs(txID)
-    outputTxs[txID].add(address)
+    if address not in outputTxs[txID]:
+        outputTxs[txID].append(address)
 
 outputs.close()
+
+print "outputTxs dict populated"
     
 addresses = dict() # associates address with user
 
@@ -157,9 +169,13 @@ addresses = dict() # associates address with user
 for address in getAddresses():
     addresses[address] = 0
 
+print "addresses dict populated"
+
 if len(inputTxs) != len(outputTxs):
     raise Exception("inputTxs and outputTxs are not of the same length")
 txs = zip(itertools.count(), inputTxs, outputTxs)
+
+print "previous dicts zipped into txs dict"
 
 # stores addresses that have already been used
 usedAddresses = set()
@@ -192,6 +208,7 @@ for tx in txs:
         union(inputs)
         outputUnion(outputs, txID)
 
+print "union completed"
 
 usersDict = dict() # associates users' address sets with their roots
 
@@ -206,6 +223,8 @@ for key, value in addresses.iteritems():
 
     else:
         usersDict[root].add(key)
+
+print "usersDict populated"
 
 # generate a list of addresses, each index being a user, from usersDict
 users = []
