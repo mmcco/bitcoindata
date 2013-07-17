@@ -47,12 +47,13 @@ def getRoot(addr):
 # returns a list of all addresses, including ones that never spend
 def getAddresses():
     tempOutputs = open("newOutputs.csv", "r")
-    addressList = []
+    addressSet = set()
     for line in tempOutputs:
         data = line.split(",", 6)
-        if data[5] not in addressList:
-            addressList.append(data[5])
-    return addressList
+        if len(data) < 7:
+            raise Exception("bad line in newOutputs.csv")
+        addressSet.add(data[5])
+    return addressSet
 
 
 # executes union-find on a tx's inputs
@@ -80,7 +81,7 @@ def union(args):
     
     # increment the root's rank if we're connecting a tree of equal rank
     if type(addresses[parent[0]]) != int:
-        raise Exception(parent[0] + " was used as a parent, but its dict value is " + addresses[parent[0]] + " which is not of type int")
+        raise Exception(parent[0], "was used as a parent, but its dict value is", addresses[parent[0]], "which is not of type int")
     for child in rootRanks:
         if child[1] == parent[1]:
             addresses[parent[0]] += 1
@@ -91,13 +92,13 @@ def union(args):
 
 # takes the addresses in a tx's outputs, conditionally unions them
 def outputUnion(args, txID):
+
     if len(args) < 2:
         raise Exception("outputUnion was passed a set of length < 2")
     
-    # because we are now using lists instead of sets, this check takes too long
-    #for addr in args:
-    #    if addr not in addresses:
-    #        raise Exception(addr, "is passed to outputUnion() but does not exist in the addresses dict")
+    for addr in args:
+        if addr not in addresses:
+            raise Exception(addr, "is passed to outputUnion() but does not exist in the addresses dict")
 
     # generate a list of tuples associating each address with a boolean that describes whether it has been used yet
     boolTuples = [(addr, addr in usedAddresses) for addr in args]
@@ -107,27 +108,29 @@ def outputUnion(args, txID):
     executeUnion = False
     for tup in boolTuples:
         # logic for first unused address encountered
-        if tup[1] and not executeUnion:
+        if not tup[1] and not executeUnion:
             addr = tup[0]
             executeUnion = True
         # logic for second unused address encountered
-        if tup[1] and executeUnion:
+        elif not tup[1] and executeUnion:
             executeUnion = False
+            break
+
+    # add args to list of used addresses
+    map (usedAddresses.add, args)
 
     if not executeUnion:
         return
 
     else:
         # if there are no inputs for this hash, its a block reward and we can't union
-        if len(inputTxs[txID] == 0):
-            return
+        if len(txs[txID][1]) == 0:
+            raise Exception("outputUnion() passed a block reward")
         # otherwise, we union to the first input address
         # all the input addresses are already unioned, so we only need to use one
         else:
-            union([inputTxs[0], addr])
-
-    # add args to list of used addresses
-    map (usedAddresses.add, args)
+            print addr
+            union([txs[txID][1][0], addr])
 
 
 inputTxs = [[]]  # index is txID, value is a list of its inputs' addresses
@@ -163,6 +166,12 @@ outputs.close()
 
 print "outputTxs dict populated"
     
+#if len(inputTxs) != len(outputTxs):
+#    raise Exception("inputTxs and outputTxs are not of the same length")
+txs = zip(itertools.count(), inputTxs, outputTxs)
+
+print "previous dicts zipped into txs dict"
+
 addresses = dict() # associates address with user
 
 # populate addresses dict, making an index of value 0 for each address
@@ -171,20 +180,14 @@ for address in getAddresses():
 
 print "addresses dict populated"
 
-if len(inputTxs) != len(outputTxs):
-    raise Exception("inputTxs and outputTxs are not of the same length")
-txs = zip(itertools.count(), inputTxs, outputTxs)
-
-print "previous dicts zipped into txs dict"
-
 # stores addresses that have already been used
 usedAddresses = set()
 
 for tx in txs:
 
     txID = tx[0]
-    inputs = tx[1]
-    outputs = tx[2]
+    inputs = set(tx[1])
+    outputs = set(tx[2])
 
     # if there are no inputs then it's a block reward, and can't be unioned
     if len(inputs) == 0:
@@ -230,8 +233,17 @@ print "usersDict populated"
 users = []
 userFile = open("heurusers.csv", "w")
 
-for counter, (key, user) in enumerate(usersDict):
+for counter, (key, user) in enumerate(usersDict.items()):
+    users.append(user)
     for address in user:
         userFile.write(address + "," + str(counter) + "\n")
 
 userFile.close()
+
+# generate a CSV file associating userIDs with the number of addresses they contain
+userCount = open("heurUsersCount.csv", "w")
+
+for counter, user in enumerate(users):
+    userCount.write(str(counter) + "," + str(len(user)) + "\n")
+
+userCount.close()
