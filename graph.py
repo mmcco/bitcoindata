@@ -1,3 +1,7 @@
+# this class represents a set of bitcoin user transactions
+# it also allows us to write it to the network markup language GraphML
+# this allows for interfacing with network analysis and visualization programs
+
 class Network:
     nodes = set([])
     edges = set([])
