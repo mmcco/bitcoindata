@@ -29,5 +29,5 @@ class Network:
         for edge in self.edges:
             graphFile.write('<edge source="' + str(edge[0]) + '" target="' + str(edge[1]) + '"/>\n')
 
-        graphFile.write('</graphml>')
+        graphFile.write('</graph>\n</graphml>\n')
         graphFile.close()
