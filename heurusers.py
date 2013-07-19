@@ -197,6 +197,11 @@ for tx in txs:
     elif len(inputs) < 2 and len(outputs) < 2:
         continue
 
+    # if the tx gives change to an input, that is the suspected change address
+    # we test this by unioning the sets and seeing if there are duplicates
+    elif len(inputs.union(outputs)) < len(inputs) + len(outputs):
+        continue
+
     # if there are multiple inputs but only one output, we can only union the inputs
     elif len(inputs) > 1 and len(outputs) < 2:
         union(inputs)

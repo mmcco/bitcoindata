@@ -8,13 +8,11 @@ addresses = dict()
 for line in users:
     
     data = line.split(",")
-    
     if len(data) != 2:
         raise Exception("bad line in users.csv")
 
     address = data[0]
     userID = data[1][:-1] # remove newline
-
     btc.addNode(userID)
     addresses[address] = userID
 
@@ -47,7 +45,6 @@ for line in outputs:
 
     if txs[txID] is None:
         continue
-
     else:
         btc.addEdge(txs[txID], addresses[data[5]])
 
