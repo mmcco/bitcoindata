@@ -35,7 +35,7 @@ def resizeOutputTxs(count):
     for i in range(0, count):
         outputTxs.append([])
 
-# returns the given addresses's root and rank in a tuple
+# returns the given addresses's root
 def getRoot(addr):
     if type(addresses[addr]) == int:
         return addr
@@ -44,7 +44,7 @@ def getRoot(addr):
         addresses[addr] = root
         return root
 
-# returns a list of all addresses, including ones that never spend
+# returns a list of all addresses, including ones that have never spent
 def getAddresses():
     tempOutputs = open("newOutputs.csv", "r")
     addressSet = set()
