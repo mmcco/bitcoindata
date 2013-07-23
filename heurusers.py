@@ -46,7 +46,7 @@ def getRoot(addr):
 
 # returns a list of all addresses, including ones that have never spent
 def getAddresses():
-    tempOutputs = open("newOutputs.csv", "r")
+    tempOutputs = open("bitcoinData/newOutputs.csv", "r")
     addressSet = set()
     for line in tempOutputs:
         data = line.split(",", 6)
@@ -134,7 +134,7 @@ def outputUnion(args, txID):
 
 inputTxs = [[]]  # index is txID, value is a list of its inputs' addresses
 outputTxs = [[]]  # same as above but for outputs
-inputs = open("newInputs.csv", "r")
+inputs = open("bitcoinData/newInputs.csv", "r")
 
 # fill a dict with a key for each address
 for line in inputs:
@@ -150,7 +150,7 @@ inputs.close()
 
 print "inputTxs dict populated"
 
-outputs = open("newOutputs.csv", "r")  # the new heuristic uses outputs
+outputs = open("bitcoinData/newOutputs.csv", "r")  # the new heuristic uses outputs
 
 for line in outputs:
 
@@ -235,7 +235,7 @@ print "usersDict populated"
 
 # generate a list of addresses, each index being a user, from usersDict
 users = []
-userFile = open("heurusers.csv", "w")
+userFile = open("bitcoinData/heurusers.csv", "w")
 
 for counter, (key, user) in enumerate(usersDict.items()):
     users.append(user)
@@ -245,7 +245,7 @@ for counter, (key, user) in enumerate(usersDict.items()):
 userFile.close()
 
 # generate a CSV file associating userIDs with the number of addresses they contain
-userCount = open("heurUsersCount.csv", "w")
+userCount = open("bitcoinData/heurUsersCount.csv", "w")
 
 for counter, user in enumerate(users):
     userCount.write(str(counter) + "," + str(len(user)) + "\n")

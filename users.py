@@ -56,7 +56,7 @@ def union(args):
 
 # returns a set of all addresses, including ones that never spend
 def getAddresses():
-    tempOutputs = open("newOutputs.csv", "r")
+    tempOutputs = open("bitcoinData/newOutputs.csv", "r")
     addressSet = set()
     for line in tempOutputs:
         data = line.split(",", 6)
@@ -66,7 +66,7 @@ def getAddresses():
 
 
 txs = [set()]  # index is txID, value is a list of its inputs' addresses
-inputs = open("newInputs.csv", "r")
+inputs = open("bitcoinData/newInputs.csv", "r")
 
 # fill a dict with a key for each address
 for line in inputs:
@@ -112,8 +112,8 @@ for key, value in addresses.iteritems():
 print "dictionary of users indexed by root populated"
 
 # write each user to a CSV file
-userFile = open("users.csv", "w")
-countFile = open("usersCount.csv", "w")
+userFile = open("bitcoinData/users.csv", "w")
+countFile = open("bitcoinData/usersCount.csv", "w")
 users = []
 
 for counter, (key, user) in enumerate(usersDict.iteritems()):
