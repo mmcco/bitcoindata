@@ -129,7 +129,6 @@ def outputUnion(args, txID):
         # otherwise, we union to the first input address
         # all the input addresses are already unioned, so we only need to use one
         else:
-            print addr
             union([txs[txID][1][0], addr])
 
 

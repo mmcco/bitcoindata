@@ -20,7 +20,7 @@ import datetime
 # we begin by converting each block's timestamp from ISO 8601 to a Unix timestamp
 blocks = open("blocks.csv", "r")
 blocks.readline()  # skip first line, which is just column names
-newBlocks = open("newBlocks.csv", "w")
+newBlocks = open("bitcoinData/newBlocks.csv", "w")
 # !!! This data type assumes that you're parsing from the genesis block; switch to dict if writing an automated updater !!!
 blockTimes = []  # location is blockID, value is Unix timestamp
 
@@ -43,7 +43,7 @@ newBlocks.close()
 # this section selects the Unix timestamp of each tx's corresponding block and inserts it into the tx
 txs = open("transactions.csv", "r")
 txs.readline()  # skip first line, which is just column names
-newTxs = open("txs.csv", "w")
+newTxs = open("bitcoinData/txs.csv", "w")
 # !!! This data type assumes that you're parsing from the genesis block; switch to dict if writing an automated updater !!!
 txHashes = []  # location is txID, value is txHash
 
@@ -92,7 +92,7 @@ inputs = open("inputs.csv", "r")
 inputs.readline() # skip first line, which is just column names
 outputs = open("outputs.csv", "r")
 outputs.readline() # skip first line, which is just column names
-newInputs = open("newInputs.csv", "w")
+newInputs = open("bitcoinData/newInputs.csv", "w")
 outputsDict = dict()  # key is output's txHash + "," +  output's index, value is the tuple (output's txID, receiving address) for each output with this txHash and index
 
 for line in outputs:
@@ -130,10 +130,10 @@ newInputs.close()
 
 
 # now we're going to go through the inputs and outputs a second time, inserting each input's txID and index into its corresponding outputs
-newInputs = open("newInputs.csv", "r")
+newInputs = open("bitcoinData/newInputs.csv", "r")
 outputs = open("outputs.csv", "r")
 outputs.readline() # skip first line, which is just column names
-newOutputs = open("newOutputs.csv", "w")
+newOutputs = open("bitcoinData/newOutputs.csv", "w")
 inputsDict = dict()  # key is output txID + "," + output index, value is input's txID + "," + input index
 
 for line in newInputs:
