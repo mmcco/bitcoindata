@@ -237,11 +237,15 @@ with open("bitcoinData/heurusers.csv", "w") as userFile:
         for address in user:
             userFile.write(address + "," + str(counter) + "\n")
 
+print "heurusers.csv written"
+
 # generate a CSV file associating userIDs with the number of addresses they contain
 with open("bitcoinData/heurUsersCount.csv", "w") as usersCount:
 
     for counter, user in enumerate(users):
         usersCount.write(str(counter) + "," + str(len(user)) + "\n")
+
+print "usersCount.csv written"
 
 # generate a CSV file that associates txIDs with the sending and receiving users (one-to-many)
 # make a dict associating addresses with their userID
@@ -271,8 +275,8 @@ with open("bitcoinData/heurTxs.csv", "w") as heurTxs, open("bitcoinData/txs.csv"
     # iterate through lines in txs.csv so that we easily ignore all the extra items in the input and output lists
     for counter, line in enumerate(txs):
         # if the tx has no inputs, it's a block reward and can't be a network edge; ignore it
-        if len(inputTxs[counter]) == 0 or len(outputTuples[counter]) == 0:
+        if len(txs[counter][1]) == 0 or len(txs[counter][2]) == 0:
             continue
-        inputUser = userIDs[inputTxs[counter][0]] # just use the first input address' user; they all have the same user
+        inputUser = userIDs[txs[counter][1][0]] # just use the first input address' user; they all have the same user
         for output in outputTuples[counter]:
             heurTxs.write(str(counter) + "," + inputUser + "," + output[0] + "," + output[1] + "\n")
