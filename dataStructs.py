@@ -58,18 +58,17 @@ def blockRewardIDs():
 #        for line in inputs:
             
 # this does not currently fit the spec
-def addressHistory(which="both"):
-    ''' returns a dict associating every address with a list of (timestamp, value, timeSpent) tuples representing its history
-    timeSpent is a Unix timestamp, and is None if the output has not yet been used as an input
+def addressHistory():
+    ''' returns a dict associating every address with a list of (txID, value, spentInTx) tuples representing its history
+    spentInTx is the txID of the tx in which the output was used as an input; it is None by default
     '''
     addresses = dict()
-    timestamps = txTimestamps()
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
         for line in outputs:
             data = line.split(",", 6)
             txID, value, address = int(data[0]), int(data[3]), data[5]
             if address not in addresses:
-                addresses[address] = [(timestamps[txID], value)]
+                addresses[address] = [txID, value, None)]
             else:
-                addresses[address].append((timestamps[txID], value))
+                addresses[address].append((txID, value, None))
     return addresses
