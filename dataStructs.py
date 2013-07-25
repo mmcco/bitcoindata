@@ -2,7 +2,7 @@
 
 def getAddresses():
     '''returns a set of all addresses'''
-    with open("bitcoinData/newOutputs.csv", "r") as outputs
+    with open("bitcoinData/newOutputs.csv", "r") as outputs:
         addressSet = set()
         for line in outputs:
             data = line.split(",", 6)
