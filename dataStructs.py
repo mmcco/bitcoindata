@@ -1,5 +1,16 @@
 '''dataStructs.py: contains functions that generate data commonly needed in Bitcoin analysis scripts'''
 
+def getAddresses():
+    '''returns a set of all addresses'''
+    with open("bitcoinData/newOutputs.csv", "r") as outputs
+        addressSet = set()
+        for line in outputs:
+            data = line.split(",", 6)
+            if len(data) < 7:
+                raise Exception("bad line in newOutputs.csv")
+            addressSet.add(data[5])
+    return addressSet
+
 def addressUsers():
     '''returns a dictionary in which the key is the address and the value is the userID'''
     userIDs = dict()

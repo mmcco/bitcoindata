@@ -9,6 +9,7 @@
 # this is because sets are represented as dictionaries in memory and therefore take up a lot of space
 
 import itertools
+from dataStructs import getAddresses
 
 # returns an input's txID and address in a tuple
 def parseInput(inputLine):
@@ -43,18 +44,6 @@ def getRoot(addr):
         root = getRoot(addresses[addr])
         addresses[addr] = root
         return root
-
-# returns a list of all addresses, including ones that have never spent
-def getAddresses():
-    with open("bitcoinData/newOutputs.csv", "r") as outputs
-        addressSet = set()
-        for line in outputs:
-            data = line.split(",", 6)
-            if len(data) < 7:
-                raise Exception("bad line in newOutputs.csv")
-            addressSet.add(data[5])
-    return addressSet
-
 
 # executes union-find on a tx's inputs
 def union(args):
