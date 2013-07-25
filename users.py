@@ -5,6 +5,8 @@
 # note that sets are used heavily - they're somewhat slower than lists but are more bug-resistant
 # if you're looking to make performance improvements, convert sets to lists where possible
 
+from dataStructs import getAddresses
+
 # parses a CSV line from newInputs.csv
 def parseInput(inputLine):
     data = inputLine.split(",")
@@ -54,30 +56,18 @@ def union(args):
         elif child[1] > parent[1]:
             raise Exception("parent selected did not have the highest rank")
 
-# returns a set of all addresses, including ones that never spend
-def getAddresses():
-    tempOutputs = open("bitcoinData/newOutputs.csv", "r")
-    addressSet = set()
-    for line in tempOutputs:
-        data = line.split(",", 6)
-        addressSet.add(data[5])
-    tempOutputs.close()
-    return addressSet
-
 
 txs = [set()]  # index is txID, value is a list of its inputs' addresses
-inputs = open("bitcoinData/newInputs.csv", "r")
 
 # fill a dict with a key for each address
-for line in inputs:
+with open("bitcoinData/newInputs.csv", "r") as inputs:
+    for line in inputs:
 
-    data = parseInput(line)
-    txID, address = int(data[0]), data[3]
-    if len(txs) <= txID:
-        resizeTxs(txID)
-    txs[txID].add(address)
-
-inputs.close()
+        data = parseInput(line)
+        txID, address = int(data[0]), data[3]
+        if len(txs) <= txID:
+            resizeTxs(txID)
+        txs[txID].add(address)
     
 print "list of addresses associated by transaction filled"
 
@@ -112,16 +102,13 @@ for key, value in addresses.iteritems():
 print "dictionary of users indexed by root populated"
 
 # write each user to a CSV file
-userFile = open("bitcoinData/users.csv", "w")
-countFile = open("bitcoinData/usersCount.csv", "w")
-users = []
+with open("bitcoinData/users.csv", "w" as userFile, open("bitcoinData/usersCount.csv", "w") as countFile:
 
-for counter, (key, user) in enumerate(usersDict.iteritems()):
-    if len(user) == 0:
-        raise Exception("trying to write a user with no addresses")
-    countFile.write(str(counter) + "," + str(len(user)) + '\n')
-    for address in user:
-        userFile.write(address + "," + str(counter) + "\n")
+    users = []
 
-userFile.close()
-countFile.close()
+    for counter, (key, user) in enumerate(usersDict.iteritems()):
+        if len(user) == 0:
+            raise Exception("trying to write a user with no addresses")
+        countFile.write(str(counter) + "," + str(len(user)) + '\n')
+        for address in user:
+            userFile.write(address + "," + str(counter) + "\n")
