@@ -46,13 +46,13 @@ def getRoot(addr):
 
 # returns a list of all addresses, including ones that have never spent
 def getAddresses():
-    tempOutputs = open("bitcoinData/newOutputs.csv", "r")
-    addressSet = set()
-    for line in tempOutputs:
-        data = line.split(",", 6)
-        if len(data) < 7:
-            raise Exception("bad line in newOutputs.csv")
-        addressSet.add(data[5])
+    with open("bitcoinData/newOutputs.csv", "r") as outputs
+        addressSet = set()
+        for line in outputs:
+            data = line.split(",", 6)
+            if len(data) < 7:
+                raise Exception("bad line in newOutputs.csv")
+            addressSet.add(data[5])
     return addressSet
 
 
