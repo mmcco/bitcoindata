@@ -2,15 +2,30 @@
 
 from operator import itemgetter
 
+
+def parseCSVLine(line, expectedLen = None):
+    '''returns a CSV line parsed into its values; throws error if it is not of expected length
+    It will only parse as many items as expected for efficiency's sake.
+    Therefore, lines longer than expected will not be caught.
+    '''
+    
+    if expectedLen = None:
+        return line.split(",")
+
+    else:
+        data = line.split(",", expectedLen - 1)
+        if len(data) != expectedLen:
+            raise Exception("line passed to parseCSVLine() was not of expected length")
+        return data
+
+
 def getAddresses():
     '''returns a set of all addresses'''
 
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
         addressSet = set()
         for line in outputs:
-            data = line.split(",", 6)
-            if len(data) < 7:
-                raise Exception("bad line in newOutputs.csv")
+            data = parseCSVLine(line, 7)
             addressSet.add(data[5])
 
     return addressSet
@@ -22,9 +37,7 @@ def inputAddresses():
     with open("bitcoinData/newInputs.csv", "r") as inputs:
         addresses = []
         for line in inputs:
-            data = line.split(",", 4)
-            if len(data) != 5:
-                raise Exception("bad line in newInputs.csv")
+            data = parseCSVLine(line, 5)
             txID, address = int(data[0]), data[3]
             while len(addresses) <= txID:
                 addresses.append([])
@@ -57,9 +70,7 @@ def addressUsers():
     userIDs = dict()
     with open("bitcoinData/heurusers.csv", "r") as usersFile:
         for line in usersFile:
-            data = line.split(",")
-            if len(data) != 2:
-                raise Exception("bad line in heurusers.csv")
+            data = parseCSVLine(line, 2)
             userIDs[data[0]] = data[1]
 
     return userIDs
@@ -71,9 +82,7 @@ def users():
     users = [[]]
     with open("bitcoin/heurusers.csv", "r") as usersFile:
         for line in usersFile:
-            data = line.split(",")
-            if len(data) != 2:
-                raise Exception("bad line in heurusers.csv")
+            data = parseCSVLine(line, 2)
             address, userID = data[0], int(data[1])
             while len(users) <= userID:
                 users.append([])
@@ -94,9 +103,7 @@ def usersByTx():
 
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
         for line in outputs:
-            data = line.split(",", 6)
-            if len(data) != 7:
-                raise Exception("bad line in newOutputs.csv")
+            data = parseCSVLine(line, 7)
             txID, address = int(data[0]), data[5]
             outputUsers[txID].append(users[data[5]])
 
@@ -113,7 +120,7 @@ def txTimestamps():
     txsByTime = []
     with open("bitcoinData/txs.csv", "r") as txsFile:
         for line in txsFile:
-            data = line.split(",", 5)
+            data = parseCSVLine(line, 6)
             if len(txsByTime) != int(data[0]):
                 raise Exception("mismatch between txID and length of txsByTime")
             txsByTime.append(int(data[4]))
@@ -127,9 +134,7 @@ def blockRewardIDs():
     rewardTxIDs = []
     with open("bitcoinData/txs.csv", "r") as txsFile:
         for line in txsFile:
-            data = line.split(",", 6)
-            if len(data) != 7:
-                raise Exception("bad line in txs.csv")
+            data = parseCSVLine(line, 7)
             if int(data[5]) == 0:
                 rewardTxIDs.append(int(data[0]))
 
@@ -144,9 +149,7 @@ def addressHistory():
     addresses = dict()
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
         for line in outputs:
-            data = line.split(",", 6)
-            if len(data) != 7:
-                raise Exception("bad line in newOutputs.csv")
+            data = parseCSVLine(line, 7)
             txID, outputIndex, value, address = int(data[0]), int(data[2]), int(data[3]), data[5]
             addresses.setdefault(address, []).append([txID, outputIndex, value, None])
     
@@ -154,9 +157,7 @@ def addressHistory():
 
     with open("bitcoinData/newInputs.csv", "r") as inputs:
         for line in inputs:
-            data = line.split(",")
-            if len(data) != 7:
-                raise Exception("bad line in newInputs.csv")
+            data = parseCSVLine(line, 7)
             inputTxID, address, outputTxID, outputIndex = int(data[0]), data[3], int(data[5]), int(data[6])
             # put input's txID with its corresponding output
             for output in addresses[address]:
