@@ -120,7 +120,7 @@ def blockRewardIDs():
 
 
 def addressHistory():
-    ''' Returns a dict associating every address with a list of (txID, value, spentInTx) tuples representing its history.
+    ''' Returns a dict associating every address with a list of (txID, outputIndex, value, spentInTxID) tuples representing its history.
     spentInTx is the txID of the tx in which the output was used as an input; it is None by default.
     Using txIDs instead of timestamps reduces ambiguity; use txTimestamps() to replace them if necessary.
     '''
@@ -154,3 +154,20 @@ def addressHistory():
     map (sort(key=itemgetter(0)), addresses)
 
     return addresses
+
+
+def userHistory():
+    '''This function is the counterpart to addressHistory(), but uses userIDs as the key instead of addresses.
+    Like addressHistory, the return value is a list of outputs owned by the given user.
+    The outputs are in the form (txID, outputIndex, value, spentInTxID)
+    '''
+
+    addressHistories = addressHistory()
+    users = addressUsers()
+    userHistories = dict()
+
+    for address, history in addressHistories.items():
+        userHistories.setdefault(users[address], [])
+        userHistories[users[address]] += history
+
+    return userHistories
