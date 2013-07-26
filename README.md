@@ -2,7 +2,11 @@ bitcoindata
 ===========
 This is an extensible toolset used to analyze the output of the [blockparser](https://github.com/mcdee/blockparser) CSV call.
 
+The tools focus on parsing the CSV output into more usable format, to group addresses by user based on multiple heuristics, and to prepare the transaction data for network analysis.
+
 Everything is currently under heavy development and is therefore likely to be broken. Within the next month I hope to have everything in stable working order.
+
+To run all of the main scripts at once, first ensure that all four of the blockparser CSV files (`inputs.csv`, `outputs.csv`, `transactions.csv`, `blocks.csv`) are in this repo's directory. Then run `bitcoindata.py`. The size of the data will more than double, and the original files will not be deleted, so make sure you have enough space in the directory.
 
 Please contact me if you have any questions about its use, or if you want to help with its development.
 
