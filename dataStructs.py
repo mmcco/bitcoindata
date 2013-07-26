@@ -65,6 +65,23 @@ def addressUsers():
     return userIDs
 
 
+def users():
+    '''returns a list whose index is the userID and whose values is a list of that user's addresses'''
+
+    users = [[]]
+    with open("bitcoin/heurusers.csv", "r") as usersFile:
+        for line in usersFile:
+            data = line.split(",")
+            if len(data) != 2:
+                raise Exception("bad line in heurusers.csv")
+            address, userID = data[0], int(data[1])
+            while len(users) <= userID:
+                users.append([])
+            users[userID].append(address)
+
+    return users
+
+
 def usersByTx():
     '''returns a list of tuples - the index is the txID, the tuples are (fromUser, [toUsers])
     fromUser is the user that owns the inputs
@@ -157,7 +174,7 @@ def addressHistory():
 
 
 def userHistory():
-    '''This function is the counterpart to addressHistory(), but uses userIDs as the key instead of addresses.
+    '''This function is the counterpart to addressHistory(), using userIDs as the key instead of addresses.
     Like addressHistory, the return value is a list of outputs owned by the given user.
     The outputs are in the form (txID, outputIndex, value, spentInTxID)
     '''
