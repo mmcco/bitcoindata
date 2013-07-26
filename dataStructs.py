@@ -33,6 +33,24 @@ def inputAddresses():
     return addresses
 
 
+def txOwners():
+    '''returns a list, the index being the txID of the owner of each transaction
+    None is used for block rewards, which have no inputs
+    '''
+
+    txAddresses = inputAddresses()
+    users = addressUsers()
+    owners = []
+    for counter, addresses in enumerate(txAddresses):
+        if len(addresses) == 0:
+            owners[counter] = None
+        else:
+            # we can just use the first address, as they all have the same owner
+            owners[counter] = addressUsers[addresses[0]]
+    
+    return owners
+
+
 def addressUsers():
     '''returns a dictionary in which the key is the address and the value is the userID'''
 
@@ -46,6 +64,30 @@ def addressUsers():
 
     return userIDs
 
+
+def usersByTx():
+    '''returns a list of tuples - the index is the txID, the tuples are (fromUser, [toUsers])
+    fromUser is the user that owns the inputs
+    toUsers are the users that own the outputs
+    '''
+
+    users = addressUsers()
+    inputUsers = txOwners()
+    outputUsers = [ [] for x in xrange(len(inputUsers)) ]
+
+    with open("bitcoinData/newOutputs.csv", "r") as outputs:
+        for line in outputs:
+            data = line.split(",", 6)
+            if len(data) != 7:
+                raise Exception("bad line in newOutputs.csv")
+            txID, address = int(data[0]), data[5]
+            outputUsers[txID].append(users[data[5]])
+
+    if len(inputUsers) != len(outputUsers):
+        raise Exception("mismatch in length between inputUsers and outputUsers")
+
+    return zip(inputUsers, outputUsers)
+    
 
 def txTimestamps():
     '''returns a list of all tx's Unix timestamps; the index is the tx's txID'''
