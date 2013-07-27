@@ -9,7 +9,7 @@ def parseCSVLine(line, expectedLen = None):
     Therefore, lines longer than expected will not be caught.
     '''
     
-    if expectedLen = None:
+    if expectedLen is None:
         return line.split(",")
 
     else:
@@ -153,20 +153,22 @@ def addressHistory():
             txID, outputIndex, value, address = int(data[0]), int(data[2]), int(data[3]), data[5]
             addresses.setdefault(address, []).append([txID, outputIndex, value, None])
     
-    print "finished loading outputs"
+    # temporary print, DELETE
+    print "finished loading outputs, len(addresses):", len(addresses)
 
     with open("bitcoinData/newInputs.csv", "r") as inputs:
         for line in inputs:
             data = parseCSVLine(line, 7)
             inputTxID, address, outputTxID, outputIndex = int(data[0]), data[3], int(data[5]), int(data[6])
             # put input's txID with its corresponding output
-            for output in addresses[address]:
+            for counter, output in enumerate(addresses[address]):
                 if output[0] == outputTxID and output[1] == outputIndex:
-                    output[3] = inputTxID
+                    addresses[address][counter][3] = inputTxID
                     break
             else:  # triggers if outputTxID does not exist in addresses[address]
                 raise Exception("input's corresponding output could not be found in list")
             
+    # temporary print, DELETE
     print "finished loading inputs"
 
     map (sort(key=itemgetter(0)), addresses)

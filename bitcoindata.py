@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# this script simply executes all of the component scripts in one go
+# this script simply executes all of the main component scripts in one go
 import os
 
 if __name__ == "__main__":
