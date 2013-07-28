@@ -9,7 +9,7 @@
 # this is because sets are represented as dictionaries in memory and therefore take up a lot of space
 
 import itertools
-from dataStructs import getAddresses
+from dataStructs import getAddresses, inputAddresses, outputAddresses
 
 # returns an input's txID and address in a tuple
 def parseInput(inputLine):
@@ -121,37 +121,8 @@ def outputUnion(args, txID):
             union([txs[txID][1][0], addr])
 
 
-inputTxs = [[]]  # index is txID, value is a list of its inputs' addresses
-outputTxs = [[]]  # same as above but for outputs
-
-# fill a dict with a key for each address
-with open("bitcoinData/newInputs.csv", "r") as inputs:
-
-    for line in inputs:
-
-        txID, address = parseInput(line)
-        txID = int(txID)
-        if len(inputTxs) <= txID:
-            resizeTxs(txID)
-        if address not in inputTxs[txID]:
-            inputTxs[txID].append(address)
-
-print "inputTxs dict populated"
-
-with open("bitcoinData/newOutputs.csv", "r") as outputs:  # the new heuristic uses outputs
-
-    for line in outputs:
-
-        data = parseOutput(line)
-        txID, address = int(data[0]), data[5]
-        if len(outputTxs) <= txID:
-            resizeOutputTxs(txID)
-        if address not in outputTxs[txID]:
-            outputTxs[txID].append(address)
-
-print "outputTxs dict populated"
-    
-txs = zip(itertools.count(), inputTxs, outputTxs)
+# txs is a two-dimensional array; each item is (txID, [unique input addresses], [unique output addresses])
+txs = zip(itertools.count(), inputAddresses(), outputAddresses())
 
 print "previous dicts zipped into txs dict"
 

@@ -48,6 +48,22 @@ def inputAddresses():
 
     return addresses
 
+def outputAddresses():
+    '''returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its outputs
+    This function includes each address only once.
+    '''
+
+    with open("bitcoinData/newOutputs.csv", "r") as outputs:
+        addresses = []
+        for line in outputs:
+            data = parseCSVLine(line, 7)
+            txID, address = int(data[0]), data[5]
+            while len(addresses) <= txID:
+                addresses.append([])
+            if address not in addresses[txID]:
+                addresses[txID].append(address)
+
+    return addresses
 
 def txOwners():
     '''returns a list, the index being the txID of the owner of each transaction
