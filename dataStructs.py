@@ -32,7 +32,9 @@ def getAddresses():
 
 
 def inputAddresses():
-    '''returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its inputs'''
+    '''returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its inputs
+    This function includes each address only once.
+    '''
 
     with open("bitcoinData/newInputs.csv", "r") as inputs:
         addresses = []
@@ -41,7 +43,8 @@ def inputAddresses():
             txID, address = int(data[0]), data[3]
             while len(addresses) <= txID:
                 addresses.append([])
-            addresses[txID].append(address)
+            if address not in addresses[txID]:
+                addresses[txID].append(address)
 
     return addresses
 

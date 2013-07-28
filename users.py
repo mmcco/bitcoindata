@@ -58,7 +58,7 @@ def union(args):
 
 
 # index is txID, value is a list of its inputs' addresses
-# WARNING: there is currently no duplicate check; convert to list of sets before using
+# WARNING: the only duplicate check is in the function
 txs = inputAddresses()
     
 print "list of addresses associated by transaction filled"
