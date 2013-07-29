@@ -11,32 +11,9 @@
 import itertools
 from dataStructs import getAddresses, inputAddresses, outputAddresses
 
-# returns an input's txID and address in a tuple
-def parseInput(inputLine):
-    data = inputLine.split(",", 4)
-    # remember, this is only meant to parse newInputs.csv, not inputs.csv
-    if len(data) != 5:
-        raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine + "  -==-  length of parsed input line is " + str(len(data)))
-    return (data[0], data[3])
-
-# returns an output's txID and address in a tuple
-def parseOutput(line):
-    data = line.split(",", 6)
-    if len(data) != 7:
-        raise Exception("bad line in newOutputs.csv")
-    return data
-
-# helper function for dynamic resize of two-dimensional array
-def resizeTxs(count):
-    for i in range(0, count):
-        inputTxs.append([])
-
-# same as above but for another 2D array
-def resizeOutputTxs(count):
-    for i in range(0, count):
-        outputTxs.append([])
 
 # returns the given addresses's root
+# does path compression, and therefore changes state (beware)
 def getRoot(addr):
     if type(addresses[addr]) == int:
         return addr
@@ -134,14 +111,11 @@ for address in getAddresses():
 
 print "addresses dict populated"
 
-# stores addresses that have already been used
 usedAddresses = set()
 
 for tx in txs:
 
-    txID = tx[0]
-    inputs = set(tx[1])
-    outputs = set(tx[2])
+    txID inputs, outputs = tx[0], set(tx[1]), set(tx[2])
 
     # if there are no inputs then it's a block reward, and can't be unioned
     if len(inputs) == 0:

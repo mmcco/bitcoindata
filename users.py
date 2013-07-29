@@ -7,17 +7,6 @@
 
 from dataStructs import getAddresses, inputAddresses
 
-# parses a CSV line from newInputs.csv
-def parseInput(inputLine):
-    data = inputLine.split(",")
-    # remember, this is only meant to parse newInputs.csv, not inputs.csv
-    if len(data) != 7:
-        raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine + "  -==-  length of parsed input line is " + str(len(data)))
-    return data
-
-def resizeTxs(count):
-    for i in range(0, count):
-        txs.append(set())
 
 # returns the given addresses's root and rank in a tuple
 def getRoot(addr):
