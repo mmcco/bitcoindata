@@ -13,6 +13,10 @@
 #
 # tx is used as an abbreviation for transaction
 
+# add file origin to path because of symlinks
+# !!! REMOVE THIS IN FINAL CODE
+import sys
+sys.path.append("/home/mike/bitcoindata")
 from dataStructs import parseCSVLine
 from dateutil.parser import parse
 import calendar
@@ -66,11 +70,11 @@ with open("transactions.csv", "r") as txs, open("bitcoinData/txs.csv", "w") as n
 # finally, we will also replace the outputTxHash (which is not a unique identifier of a tx) with an outputTxID (which is a unique identifier of a tx)
 outputsDict = dict()  # key is output's txHash + "," +  output's index, value is the tuple (output's txID, receiving address) for each output with this txHash and index
 
-with open("inputs.csv", "r") as outputs:
+with open("outputs.csv", "r") as outputs:
     outputs.readline() # skip first line, which is just column names
     for line in outputs:
         data = parseCSVLine(line, 6)
-        txID, index, address = data[0], data[1], data[4]
+        txID, index, value, address = data[0], data[1], data[2], data[4]
         if int(txID) >= len(txHashes):
             raise Exception("output txID " + txID + " is outside the range available in txHashes  -==-  maximum available txID is " + str(len(txHashes)))
         txHash = txHashes[int(txID)]
