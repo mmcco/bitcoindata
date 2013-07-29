@@ -8,10 +8,10 @@ Everything is currently under heavy development and is therefore likely to be br
 
 To run all of the main scripts at once, first ensure that all four of the blockparser CSV files (`inputs.csv`, `outputs.csv`, `transactions.csv`, `blocks.csv`) are in this repo's directory. Then run `bitcoindata.py`. The new data will be larger than the original files, and the original files will not be deleted, so make sure you have enough space in the directory.
 
-New files generated:
-`users.csv`: A CSV file that associates addresses with their user IDs. This uses the classic user generation heuristic described by [Reid & Harrigan](http://arxiv.org/abs/1107.4524).
-`heurusers.csv`: The same as above, but using the new heuristic, which also analyzes output data. A comprehensive description of this heuristic will be published soon.
-`usersCount.csv`: Associates each userID with the number of addresses assigned to it, using the classic heuristic.
+New files generated:  
+`users.csv`: A CSV file that associates addresses with their user IDs. This uses the classic user generation heuristic described by [Reid & Harrigan](http://arxiv.org/abs/1107.4524).  
+`heurusers.csv`: The same as above, but using the new heuristic, which also analyzes output data. A comprehensive description of this heuristic will be published soon.  
+`usersCount.csv`: Associates each userID with the number of addresses assigned to it, using the classic heuristic.  
 `heurUsersCount.csv`: The same as above, but for the new heuristic.
 
 Please contact me if you have any questions about its use, or if you want to help with its development.
