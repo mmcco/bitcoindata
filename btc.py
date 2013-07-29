@@ -13,9 +13,18 @@
 #
 # tx is used as an abbreviation for transaction
 
+from dataStructs import parseCSVLine
 from dateutil.parser import parse
 import calendar
 import datetime
+
+
+def newlineTrim(string):
+    if len(string) == 0 or string[-1] != '\n':
+        return string
+    else:
+        return string[:-1]
+
 
 # we begin by converting each block's timestamp from ISO 8601 to a Unix timestamp
 # !!! This data type assumes that you're parsing from the genesis block; switch to dict if writing an automated updater !!!
@@ -52,30 +61,7 @@ with open("transactions.csv", "r") as txs, open("bitcoinData/txs.csv", "w") as n
         txHashes.append(data[1])
 
 
-# parses a CSV line from inputs.csv or newInputs.csv
-def parseInput(inputLine):
-    data = inputLine.split(",")
-    # allow data to be of length 5 or 7 because this function is used to parse both inputs.csv and newInputs.csv
-    if len(data) != 5 and len(data) != 7:
-        raise Exception("bad line in inputs - cannot parse  -==-  " + inputLine)
-    return data
-
-# parses a CSV line from outputs.csv
-def parseOutput(outputLine):
-    data = outputLine.split(",", 5)
-    if len(data) != 6:
-        raise Exception("bad line in outputs.csv - cannot parse  -==-  " + outputLine)
-    # drop the end of the line, as it's just trailing commas
-    return data[:5]
-
-def newlineTrim(string):
-    if len(string) == 0 or string[-1] != '\n':
-        return string
-    else:
-        return string[:-1]
-
-
-# we will first get the addresses from the outputs and insert them into the inputs
+# we will first get the addresses and values from the outputs and insert them into the inputs
 # we will also insert the txHash into the inputs (which initially only has the txID)
 # finally, we will also replace the outputTxHash (which is not a unique identifier of a tx) with an outputTxID (which is a unique identifier of a tx)
 outputsDict = dict()  # key is output's txHash + "," +  output's index, value is the tuple (output's txID, receiving address) for each output with this txHash and index
@@ -83,7 +69,7 @@ outputsDict = dict()  # key is output's txHash + "," +  output's index, value is
 with open("inputs.csv", "r") as outputs:
     outputs.readline() # skip first line, which is just column names
     for line in outputs:
-        data = parseOutput(line)
+        data = parseCSVLine(line, 6)
         txID, index, address = data[0], data[1], data[4]
         if int(txID) >= len(txHashes):
             raise Exception("output txID " + txID + " is outside the range available in txHashes  -==-  maximum available txID is " + str(len(txHashes)))
@@ -91,26 +77,24 @@ with open("inputs.csv", "r") as outputs:
         dictIndex = txHash + "," + index
         # allow for multiple values in each outputsDict location because txHashes are not unique identifiers of txs
         # in accordance with the Bitcoin protocol, each outputsDict location is a queue
-        if dictIndex not in outputsDict:
-            outputsDict[dictIndex] = [(txID, address)]
-        else:
-            outputsDict[dictIndex].append( (txID, address) )
+        outputsDict.setdefault(dictIndex, []).append((txID, address, value))
 
 with open("inputs.csv", "r") as inputs, open("bitcoinData/newInputs.csv", "w") as newInputs:
     inputs.readline() # skip first line, which is just column names
     for line in inputs:
-        data = parseInput(line)
+        data = parseCSVLine(line, 5)
         txID, index, outputTxHash, outputTxIndex = data[0], data[1], data[3], data[4]
         outputsDictKey = outputTxHash + "," + newlineTrim(outputTxIndex)  # used as the index for outputsDict
         if outputsDictKey not in outputsDict:
             raise Exception("input index " + index + " from transaction ID " + txID + " calls an output that does not exist in outputsDict  -==-  attempted index: " + outputTxHash + "," + outputTxIndex) 
         if len(outputsDict[outputsDictKey]) == 0:
             raise Exception("the output for input index " + index + "from transaction ID " + txID + "has already been used")
-        outputTxID, address = outputsDict[outputsDictKey].pop(0) # the oldest output is the one that has to be used first, according to the protocol
+        outputTxID, address, value = outputsDict[outputsDictKey].pop(0) # the oldest output is the one that has to be used first, according to the protocol
         txHash = txHashes[int(txID)]
         data[3] = outputTxID  # replacing the outputTxHash with an outputTxID
         data.insert(1, txHash)
         data.insert(3, address)
+        data.insert(4, value)
         newInputs.write(",".join(data))
 
 
@@ -119,14 +103,14 @@ inputsDict = dict()  # key is output txID + "," + output index, value is input's
 
 with open("bitcoinData/newInputs.csv", "r") as newInputs:
     for line in newInputs:
-        data = parseInput(line)
-        txID, index, outputTxHash, outputTxIndex
+        data = parseCSVLine(line, 9)
+        txID, index, outputTxHash, outputTxIndex = data[0], data[2], data[7], data[8]
         inputsDict[ outputTxHash + "," + newlineTrim(outputTxIndex) ] = txID + "," + index
 
 with open("outputs.csv", "r") as outputs, open("bitcoinData/newOutputs.csv", "w") as newOutputs:
     outputs.readline() # skip first line, which is just column names
     for line in outputs:
-        data = parseOutput(line)
+        data = parseCSVLine(line, 3)
         txID, index = data[0], data[1]
         # if there's a corresponding input, this output has been spent
         if txID + "," + index in inputsDict:

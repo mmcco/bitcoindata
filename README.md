@@ -2,7 +2,7 @@ bitcoindata
 ===========
 This is an extensible toolset used to analyze the output of the [blockparser](https://github.com/mcdee/blockparser) CSV call.
 
-The tools focus on parsing the CSV output into more usable format, to group addresses by user based on multiple heuristics, and to prepare the transaction data for network analysis.
+The tools focus on parsing the CSV output into more usable format, grouping addresses by user based on multiple heuristics, and preparing the transaction data for network analysis.
 
 Everything is currently under heavy development and is therefore likely to be broken. Within the next month I hope to have everything in stable working order.
 

@@ -1,4 +1,4 @@
-'''dataStructs.py: contains functions that generate data commonly needed in Bitcoin analysis scripts'''
+'''dataStructs.py: contains functions that generate data structures commonly needed in Bitcoin analysis scripts'''
 
 from operator import itemgetter
 
@@ -161,7 +161,7 @@ def blockRewardIDs():
 
 
 def addressHistory():
-    ''' Returns a dict associating every address with a list of (txID, outputIndex, value, spentInTxID) tuples representing its history.
+    ''' Returns a dict associating every address with a set of (txID, outputIndex, value, spentInTxID) tuples representing its history.
     spentInTx is the txID of the tx in which the output was used as an input; it is None by default.
     Using txIDs instead of timestamps reduces ambiguity; use txTimestamps() to replace them if necessary.
     '''
@@ -170,23 +170,32 @@ def addressHistory():
         for line in outputs:
             data = parseCSVLine(line, 7)
             txID, outputIndex, value, address = int(data[0]), int(data[2]), int(data[3]), data[5]
-            addresses.setdefault(address, []).append([txID, outputIndex, value, None])
+            #print txID, outputIndex, value, address
+            addresses.setdefault(address, set()).add((txID, outputIndex, value, None))
     
     # temporary print, DELETE
     print "finished loading outputs, len(addresses):", len(addresses)
 
     with open("bitcoinData/newInputs.csv", "r") as inputs:
         for line in inputs:
-            data = parseCSVLine(line, 7)
-            inputTxID, address, outputTxID, outputIndex = int(data[0]), data[3], int(data[5]), int(data[6])
+            data = parseCSVLine(line, 8)
+            inputTxID, address, outputTxID, outputIndex = int(data[0]), data[3], int(data[6]), int(data[7])
+            print inputTxID, address, outputTxID, outputIndex
             # put input's txID with its corresponding output
-            for counter, output in enumerate(addresses[address]):
-                if output[0] == outputTxID and output[1] == outputIndex:
-                    addresses[address][counter][3] = inputTxID
-                    break
-            else:  # triggers if outputTxID does not exist in addresses[address]
-                raise Exception("input's corresponding output could not be found in list")
-            
+
+            if (outputTxID, outputIndex, value, None) not in addresses[address]:
+                raise Exception("input found without corresponding unspent output")
+            else:
+                addresses[address].remove((outputTxID, outputIndex, value, None))
+                addresses[address].add((outputTxID, outputIndex, value, inputTxID))
+
+#            for counter, output in enumerate(addresses[address]):
+#                if output[0] == outputTxID and output[1] == outputIndex:
+#                    addresses[address][counter][3] = inputTxID
+#                    break
+#            else:  # triggers if outputTxID does not exist in addresses[address]
+#                raise Exception("input's corresponding output could not be found in list")
+
     # temporary print, DELETE
     print "finished loading inputs"
 
