@@ -192,9 +192,7 @@ def addressHistory():
     # temporary print, DELETE
     print "finished loading outputs, len(addresses):", len(addresses)
 
-    map (sort(key=itemgetter(0)), addresses)
-
-    return addresses
+    return [sorted(address, key = lambda x: x[0]) for address in addresses]
 
 
 def userHistory():
@@ -211,6 +209,10 @@ def userHistory():
         userHistories.setdefault(users[address], [])
         userHistories[users[address]] += history
 
-    map (sort(key=itemgetter(0)), userHistories)
+    return [sorted(userHistory, key = lambda x: x[0]) for userHistory in userHistories]
+    
 
-    return userHistories
+def outputsList():
+    '''Returns a list of a tuple (txID, outputIndex, value, spentInTxID) for each output.'''
+
+    return [output for address in addressHistory().values() for output in address].sort(key = lambda x: x[0])
