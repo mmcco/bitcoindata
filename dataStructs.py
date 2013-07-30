@@ -20,7 +20,7 @@ def parseCSVLine(line, expectedLen = None):
 
 
 def getAddresses():
-    '''returns a set of all addresses'''
+    '''Returns a set of all addresses.'''
 
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
         addressSet = set()
@@ -32,7 +32,7 @@ def getAddresses():
 
 
 def inputAddresses():
-    '''returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its inputs
+    '''Returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its inputs.
     This function includes each address only once.
     '''
 
@@ -49,7 +49,7 @@ def inputAddresses():
     return addresses
 
 def outputAddresses():
-    '''returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its outputs
+    '''Returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its outputs.
     This function includes each address only once.
     '''
 
@@ -66,7 +66,7 @@ def outputAddresses():
     return addresses
 
 def txOwners(useHeur = True):
-    '''returns a list, the index being the txID of the owner of each transaction
+    '''Returns a list, the index being the txID of the owner of each transaction.
     None is used for block rewards, which have no inputs
     The useHeur boolean determines whether to use the heuristic or traditional users.
     It is True by default.
@@ -147,7 +147,7 @@ def usersByTx(useHeur = True):
     
 
 def txTimestamps():
-    '''returns a list of all tx's Unix timestamps; the index is the tx's txID'''
+    '''Returns a list of all tx's Unix timestamps; the index is the tx's txID.'''
 
     # make a list associating txIDs with their timestamps
     txsByTime = []
@@ -162,7 +162,7 @@ def txTimestamps():
 
 
 def blockRewardIDs():
-    '''returns a list of the txIDs of all block rewards'''
+    '''Returns a list of the txIDs of all block rewards.'''
 
     rewardTxIDs = []
     with open("bitcoinData/txs.csv", "r") as txsFile:
@@ -179,39 +179,18 @@ def addressHistory():
     spentInTx is the txID of the tx in which the output was used as an input; it is None by default.
     Using txIDs instead of timestamps reduces ambiguity; use txTimestamps() to replace them if necessary.
     '''
+
     addresses = dict()
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
         for line in outputs:
-            data = parseCSVLine(line, 7)
+            data = parseCSVLine(line, 8)
             txID, outputIndex, value, address = int(data[0]), int(data[2]), int(data[3]), data[5]
-            #print txID, outputIndex, value, address
+            # inputTxID is None if the output is unspent
+            inputTxID = int(data[6]) if data[6] else None
             addresses.setdefault(address, set()).add((txID, outputIndex, value, None))
     
     # temporary print, DELETE
     print "finished loading outputs, len(addresses):", len(addresses)
-
-    with open("bitcoinData/newInputs.csv", "r") as inputs:
-        for line in inputs:
-            data = parseCSVLine(line, 8)
-            inputTxID, address, outputTxID, outputIndex = int(data[0]), data[3], int(data[6]), int(data[7])
-            print inputTxID, address, outputTxID, outputIndex
-            # put input's txID with its corresponding output
-
-            if (outputTxID, outputIndex, value, None) not in addresses[address]:
-                raise Exception("input found without corresponding unspent output")
-            else:
-                addresses[address].remove((outputTxID, outputIndex, value, None))
-                addresses[address].add((outputTxID, outputIndex, value, inputTxID))
-
-#            for counter, output in enumerate(addresses[address]):
-#                if output[0] == outputTxID and output[1] == outputIndex:
-#                    addresses[address][counter][3] = inputTxID
-#                    break
-#            else:  # triggers if outputTxID does not exist in addresses[address]
-#                raise Exception("input's corresponding output could not be found in list")
-
-    # temporary print, DELETE
-    print "finished loading inputs"
 
     map (sort(key=itemgetter(0)), addresses)
 
@@ -231,5 +210,7 @@ def userHistory():
     for address, history in addressHistories.items():
         userHistories.setdefault(users[address], [])
         userHistories[users[address]] += history
+
+    map (sort(key=itemgetter(0)), userHistories)
 
     return userHistories
