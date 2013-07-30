@@ -1,6 +1,7 @@
 '''dataStructs.py: contains functions that generate data structures commonly needed in Bitcoin analysis scripts'''
 
 from operator import itemgetter
+import os.path
 
 
 def parseCSVLine(line, expectedLen=None):
@@ -19,14 +20,22 @@ def parseCSVLine(line, expectedLen=None):
         return data
 
 
+def newlineTrim(string):
+    '''Removes a newline character from the end of a string if it is present'''
+
+    if len(string) == 0 or string[-1] != '\n':
+        return string
+    else:
+        return string[:-1]
+
+
 def txHashes():
     '''Returns a list in which the index is the txID and the value is the txHash.'''
 
     # allowing transactions.csv to be used allows us to use this in parser.py (before txs.cvs exists)
-    filename = "transactions.csv" if os.path.isfile("transactions.csv") else "bitcoinData/txs.csv"
     hashes = []
 
-    with (open(filename, "r") as txsFile:
+    with open("bitcoinData/txs.csv", "r") as txsFile:
         for line in txsFile:
             data = parseCSVLine(line, 3)
             txID, txHash = int(data[0]), data[1]
@@ -35,6 +44,22 @@ def txHashes():
             hashes.append(txHash)
 
     return hashes
+
+
+def blockTimes():
+    '''Returns a list in which the index is the blockID and the value is the Unix timestamp.'''
+
+    blocktimes = []
+
+    with open("bitcoinData/newBlocks.csv", "r") as blocksFile:
+        for line in blocksFile:
+            data = parseCSVLine(line, 5)
+            blockID, timestamp = int(data[0]), int(data[3])
+            if blockID != len(blocktimes):
+                raise Exception("mismatch between blockID and len(blocktimes)")
+            blocktimes.append(timestamp)
+
+    return blocktimes
 
 
 def getAddresses():

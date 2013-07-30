@@ -17,17 +17,10 @@
 # !!! REMOVE THIS IN FINAL CODE
 import sys
 sys.path.append("/home/mike/bitcoindata")
-from dataStructs import parseCSVLine
+from dataStructs import parseCSVLine, newlineTrim, blockTimes
 from dateutil.parser import parse
 import calendar
 import datetime
-
-
-def newlineTrim(string):
-    if len(string) == 0 or string[-1] != '\n':
-        return string
-    else:
-        return string[:-1]
 
 
 # we begin by converting each block's timestamp from ISO 8601 to a Unix timestamp
