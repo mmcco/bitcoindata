@@ -112,9 +112,9 @@ with open("bitcoinData/newInputs.csv", "r") as newInputs:
         inputsDict[ outputTxHash + "," + newlineTrim(outputTxIndex) ] = txID + "," + index
 
 with open("outputs.csv", "r") as outputs, open("bitcoinData/newOutputs.csv", "w") as newOutputs:
-    outputs.readline() # skip first line, which is just column names
+    outputs.readline()  # skip first line, which is just column names
     for line in outputs:
-        data = parseCSVLine(line, 3)
+        data = parseCSVLine(line, 6)[:-1]  # remove the last item, which is just two empty columns
         txID, index = data[0], data[1]
         # if there's a corresponding input, this output has been spent
         if txID + "," + index in inputsDict:
@@ -129,4 +129,4 @@ with open("outputs.csv", "r") as outputs, open("bitcoinData/newOutputs.csv", "w"
         data.insert(1, txHash)
         data.append(inputTxID)
         data.append(inputIndex)
-        newOutputs.write(",".join(data) + '\n')
+        newOutputs.write(",".join(txID, txHash, ) + '\n')

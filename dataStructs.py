@@ -149,14 +149,15 @@ def usersByTx(useHeur = True):
 def txTimestamps():
     '''Returns a list of all tx's Unix timestamps; the index is the tx's txID.'''
 
-    # make a list associating txIDs with their timestamps
     txsByTime = []
+
     with open("bitcoinData/txs.csv", "r") as txsFile:
         for line in txsFile:
             data = parseCSVLine(line, 6)
-            if len(txsByTime) != int(data[0]):
+            txID, timestamp = int(data[0]), int(data[4])
+            if len(txsByTime) != txID:
                 raise Exception("mismatch between txID and length of txsByTime")
-            txsByTime.append(int(data[4]))
+            txsByTime.append(timestamp)
 
     return txsByTime
 
