@@ -62,6 +62,28 @@ def blockTimes():
     return blocktimes
 
 
+def outputsDict():
+    '''Returns a dict in which the key is (txHash + "," + outputIndex) and the value is a tuple: (outputTxID, receivingAddress)'''
+
+    outputs = dict()
+    hashes = txHashes()
+
+    with open("outputs.csv", "r") as outputsFile:
+        outputsFile.readline()  # skip first line, which is just column names
+        for line in outputsFile:
+            data = parseCSVLine(line, 6)
+            txID, index, value, address = data[0], data[1], data[2], data[4]
+            if int(txID) >= len(hashes):
+                raise Exception("output txID " + txID + " is outside the range available in hashes  -==-  maximum available txID is " + str(len(hashes)))
+            txHash = hashes[int(txID)]
+            dictIndex = txHash + "," + index
+            # allow for multiple values in each outputs location because txHashes are not unique identifiers of txs
+            # in accordance with the Bitcoin protocol, each outputs location is a queue
+            outputs.setdefault(dictIndex, []).append((txID, address, value))
+
+    return outputs
+
+
 def getAddresses():
     '''Returns a set of all addresses.'''
 
