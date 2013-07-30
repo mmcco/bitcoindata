@@ -107,8 +107,8 @@ inputsDict = dict()  # key is output txID + "," + output index, value is input's
 
 with open("bitcoinData/newInputs.csv", "r") as newInputs:
     for line in newInputs:
-        data = parseCSVLine(line, 9)
-        txID, index, outputTxHash, outputTxIndex = data[0], data[2], data[7], data[8]
+        data = parseCSVLine(line, 8)
+        txID, index, outputTxHash, outputTxIndex = data[0], data[2], data[6], data[7]
         inputsDict[ outputTxHash + "," + newlineTrim(outputTxIndex) ] = txID + "," + index
 
 with open("outputs.csv", "r") as outputs, open("bitcoinData/newOutputs.csv", "w") as newOutputs:

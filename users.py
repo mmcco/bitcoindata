@@ -5,6 +5,9 @@
 # note that sets are used heavily - they're somewhat slower than lists but are more bug-resistant
 # if you're looking to make performance improvements, convert sets to lists where possible
 
+# temporary path extension to fix symlink bug
+import sys
+sys.path.append("/home/mike/bitcoindata")
 from dataStructs import getAddresses, inputAddresses
 
 
@@ -83,7 +86,7 @@ for key, value in addresses.iteritems():
 print "dictionary of users indexed by root populated"
 
 # write each user to a CSV file
-with open("bitcoinData/users.csv", "w" as userFile, open("bitcoinData/usersCount.csv", "w") as countFile:
+with open("bitcoinData/users.csv", "w") as userFile, open("bitcoinData/usersCount.csv", "w") as countFile:
 
     users = []
 

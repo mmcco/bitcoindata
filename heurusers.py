@@ -22,6 +22,7 @@ def getRoot(addr):
         addresses[addr] = root
         return root
 
+
 # executes union-find on a tx's inputs
 def union(args):
     
@@ -115,7 +116,8 @@ usedAddresses = set()
 
 for tx in txs:
 
-    txID inputs, outputs = tx[0], set(tx[1]), set(tx[2])
+    # inputs and outputs are cast to sets to remove duplicates
+    txID, inputs, outputs = tx[0], set(tx[1]), set(tx[2])
 
     # if there are no inputs then it's a block reward, and can't be unioned
     if len(inputs) == 0:
@@ -125,8 +127,8 @@ for tx in txs:
     elif len(inputs) < 2 and len(outputs) < 2:
         continue
 
-    # if the tx gives change to an input, that is the suspected change address
-    # we test this by unioning the sets and seeing if there are duplicates
+    # if the tx outputs to an address used in an input, that is the suspected change address
+    # we test for duplicates by unioning the sets
     elif len(inputs.union(outputs)) < len(inputs) + len(outputs):
         continue
 
@@ -179,4 +181,4 @@ with open("bitcoinData/heurUsersCount.csv", "w") as usersCount:
     for counter, user in enumerate(users):
         usersCount.write(str(counter) + "," + str(len(user)) + "\n")
 
-print "usersCount.csv written"
+print "heurUsersCount.csv written"

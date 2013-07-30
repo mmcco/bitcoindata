@@ -4,7 +4,7 @@ from operator import itemgetter
 
 
 def parseCSVLine(line, expectedLen = None):
-    '''returns a CSV line parsed into its values; throws error if it is not of expected length
+    '''Returns a CSV line parsed into its values; throws exception if it is not of expected length.
     It will only parse as many items as expected for efficiency's sake.
     Therefore, lines longer than expected will not be caught.
     '''
@@ -65,13 +65,15 @@ def outputAddresses():
 
     return addresses
 
-def txOwners():
+def txOwners(useHeur = True):
     '''returns a list, the index being the txID of the owner of each transaction
     None is used for block rewards, which have no inputs
+    The useHeur boolean determines whether to use the heuristic or traditional users.
+    It is True by default.
     '''
 
     txAddresses = inputAddresses()
-    users = addressUsers()
+    users = addressUsers(useHeur)
     owners = []
     for counter, addresses in enumerate(txAddresses):
         if len(addresses) == 0:
@@ -83,11 +85,16 @@ def txOwners():
     return owners
 
 
-def addressUsers():
-    '''returns a dictionary in which the key is the address and the value is the userID'''
+def addressUsers(useHeur = True):
+    '''Returns a dictionary in which the key is the address and the value is the userID.
+    The useHeur boolean determines whether to use the heuristic or traditional users.
+    It is True by default.
+    '''
 
     userIDs = dict()
-    with open("bitcoinData/heurusers.csv", "r") as usersFile:
+    filename = "bitcoinData/heurusers.csv" if useHeur else "bitcoinData/users.csv"
+
+    with open(filename, "r") as usersFile:
         for line in usersFile:
             data = parseCSVLine(line, 2)
             userIDs[data[0]] = data[1]
@@ -95,10 +102,15 @@ def addressUsers():
     return userIDs
 
 
-def users():
-    '''returns a list whose index is the userID and whose values is a list of that user's addresses'''
+def users(useHeur = True):
+    '''Returns a list whose index is the userID and whose values is a list of that user's addresses.
+    The useHeur boolean determines whether to use the heuristic or traditional users.
+    It is True by default.
+    '''
 
     users = [[]]
+    filename = "bitcoinData/heurusers.csv" if useHeur else "bitcoinData/users.csv"
+
     with open("bitcoin/heurusers.csv", "r") as usersFile:
         for line in usersFile:
             data = parseCSVLine(line, 2)
@@ -110,14 +122,16 @@ def users():
     return users
 
 
-def usersByTx():
-    '''returns a list of tuples - the index is the txID, the tuples are (fromUser, [toUsers])
-    fromUser is the user that owns the inputs
-    toUsers are the users that own the outputs
+def usersByTx(useHeur = True):
+    '''Returns a list of tuples - the index is the txID, the tuples are (fromUser, [toUsers]).
+    fromUser is the user that owns the inputs.
+    toUsers are the users that own the outputs.
+    The useHeur boolean determines whether to use the heuristic or traditional users.
+    It is True by default.
     '''
 
-    users = addressUsers()
-    inputUsers = txOwners()
+    users = addressUsers(useHeur)
+    inputUsers = txOwners(useHeur)
     outputUsers = [ [] for x in xrange(len(inputUsers)) ]
 
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
