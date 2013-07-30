@@ -174,6 +174,20 @@ def blockRewardIDs():
     return rewardTxIDs
 
 
+def priceHistory():
+    '''Returns a list of tuples: (unixTimestamp, priceUSD) that includes every past Mt. Gox transaction'''
+
+    trades = []
+
+    with open("bitcoinData/trades.csv", "r") as tradesFile:
+        for line in tradesFile:
+            price, quantity, timestamp = parseCSVLine(line, 3)
+            trades.append((timestamp, price))
+
+    trades.sort(key = lambda x: x[0])
+    return trades
+
+
 def addressHistory():
     ''' Returns a dict associating every address with a set of (txID, outputIndex, value, spentInTxID) tuples representing its history.
     spentInTx is the txID of the tx in which the output was used as an input; it is None by default.
@@ -192,27 +206,31 @@ def addressHistory():
     # temporary print, DELETE
     print "finished loading outputs, len(addresses):", len(addresses)
 
-    return [sorted(address, key = lambda x: x[0]) for address in addresses]
+    [address.sort(key = lambda x: x[0]) for address in addresses]
+    return addresses
 
 
-def userHistory():
+def userHistory(useHeur = True):
     '''This function is the counterpart to addressHistory(), using userIDs as the key instead of addresses.
     Like addressHistory, the return value is a list of outputs owned by the given user.
     The outputs are in the form (txID, outputIndex, value, spentInTxID)
     '''
 
     addressHistories = addressHistory()
-    users = addressUsers()
+    users = addressUsers(useHeur)
     userHistories = dict()
 
     for address, history in addressHistories.items():
         userHistories.setdefault(users[address], [])
         userHistories[users[address]] += history
 
-    return [sorted(userHistory, key = lambda x: x[0]) for userHistory in userHistories]
+    [userHistory.sort(key = lambda x: x[0]) for userHistory in userHistories]
+    return userHistories
     
 
 def outputsList():
     '''Returns a list of a tuple (txID, outputIndex, value, spentInTxID) for each output.'''
 
-    return [output for address in addressHistory().values() for output in address].sort(key = lambda x: x[0])
+    outputs = [output for address in addressHistory().values() for output in address]
+    outputs.sort(key = lambda x: x[0])
+    return outputs
