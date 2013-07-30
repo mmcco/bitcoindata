@@ -3,12 +3,12 @@
 from operator import itemgetter
 
 
-def parseCSVLine(line, expectedLen = None):
+def parseCSVLine(line, expectedLen=None):
     '''Returns a CSV line parsed into its values; throws exception if it is not of expected length.
     It will only parse as many items as expected for efficiency's sake.
     Therefore, lines longer than expected will not be caught.
     '''
-    
+
     if expectedLen is None:
         return line.split(",")
 
@@ -17,6 +17,24 @@ def parseCSVLine(line, expectedLen = None):
         if len(data) != expectedLen:
             raise Exception("line passed to parseCSVLine() was not of expected length")
         return data
+
+
+def txHashes():
+    '''Returns a list in which the index is the txID and the value is the txHash.'''
+
+    # allowing transactions.csv to be used allows us to use this in parser.py (before txs.cvs exists)
+    filename = "transactions.csv" if os.path.isfile("transactions.csv") else "bitcoinData/txs.csv"
+    hashes = []
+
+    with (open(filename, "r") as txsFile:
+        for line in txsFile:
+            data = parseCSVLine(line, 3)
+            txID, txHash = int(data[0]), data[1]
+            if len(hashes) != txID:
+                raise Exception("mismatch between txID and len(hashes)")
+            hashes.append(txHash)
+
+    return hashes
 
 
 def getAddresses():
@@ -81,7 +99,7 @@ def txOwners(useHeur = True):
         else:
             # we can just use the first address, as they all have the same owner
             owners[counter] = addressUsers[addresses[0]]
-    
+
     return owners
 
 
@@ -144,7 +162,7 @@ def usersByTx(useHeur = True):
         raise Exception("mismatch in length between inputUsers and outputUsers")
 
     return zip(inputUsers, outputUsers)
-    
+
 
 def txTimestamps():
     '''Returns a list of all tx's Unix timestamps; the index is the tx's txID.'''
@@ -203,7 +221,7 @@ def addressHistory():
             # inputTxID is None if the output is unspent
             inputTxID = int(data[6]) if data[6] else None
             addresses.setdefault(address, set()).add((txID, outputIndex, value, None))
-    
+
     # temporary print, DELETE
     print "finished loading outputs, len(addresses):", len(addresses)
 
@@ -227,7 +245,7 @@ def userHistory(useHeur = True):
 
     [userHistory.sort(key = lambda x: x[0]) for userHistory in userHistories]
     return userHistories
-    
+
 
 def outputsList():
     '''Returns a list of a tuple (txID, outputIndex, value, spentInTxID) for each output.'''
