@@ -1,3 +1,5 @@
+# !!! DEPRECATED !!! This script is being split into four scripts.
+
 # this script is an attempted all-in-one processor of the blockparser CSV-generator's output
 # it makes changes that are necessary or convenient, preparing the data for parsing by a SQL database and for a union-find algorithm to generate a list of entities
 #
