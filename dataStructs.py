@@ -62,12 +62,23 @@ def blockTimes():
     return blocktimes
 
 
-def outputsDict():
-    '''Returns a dict in which the key is (txHash + "," + outputIndex) and the value is a tuple: (outputTxID, receivingAddress)'''
+def spentOutputsDict():
+    '''Returns a dict in which the key is (txHash + "," + outputIndex) and the value is a tuple: (outputTxID, receivingAddress, value).
+    For efficiency's sake, only spent outputs are represented.
+    '''
 
     outputs = dict()
     hashes = txHashes()
+    
+    # initialize the outputs dict with all spent outputs
+    with open("inputs.csv", "r") as inputsFile:
+        inputsFile.readline()
+        for line in inputsFile:
+            data = parseCSVLine(line, 5)
+            outputTxHash, outputIndex = data[3], newlineTrim(data[4])
+            outputs[outputTxHash + "," + outputIndex] = []
 
+    
     with open("outputs.csv", "r") as outputsFile:
         outputsFile.readline()  # skip first line, which is just column names
         for line in outputsFile:
@@ -77,11 +88,29 @@ def outputsDict():
                 raise Exception("output txID " + txID + " is outside the range available in hashes  -==-  maximum available txID is " + str(len(hashes)))
             txHash = hashes[int(txID)]
             dictIndex = txHash + "," + index
+            # if it isn't in the dict, it isn't spent; continue
+            if dictIndex not in outputs:
+                continue
             # allow for multiple values in each outputs location because txHashes are not unique identifiers of txs
             # in accordance with the Bitcoin protocol, each outputs location is a queue
-            outputs.setdefault(dictIndex, []).append((txID, address, value))
+            outputs[dictIndex].append((txID, address, value))
 
     return outputs
+
+
+def outputsTxIDs():
+    '''Returns a list in chronological order of output's corresponding txIDs to be zipped into a list of outputs.'''
+
+    txIDs = []
+
+    with open("bitcoinData/txs.csv", "r") as txsFile:
+        for line in txsFile:
+            data = parseCSVLine(line, 8)
+            txID, numOutputs = int(data[0]), int(data[6])
+            for x in xrange(numOutputs):
+                txIDs.append(txID)
+
+    return txIDs
 
 
 def getAddresses():
