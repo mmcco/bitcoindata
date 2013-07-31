@@ -4,7 +4,6 @@
 # (3) go back thfough inputs, writing info
 
 from dataStructs import txHashes, parseCSVLine, spentOutputsDict, newlineTrim
-from itertools import izip
 
 # we will first get the addresses and values from the outputs and insert them into the inputs
 # we will also insert the txHash into the inputs (which initially only has the txID)
