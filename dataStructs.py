@@ -2,6 +2,7 @@
 
 from operator import itemgetter
 import os.path
+from array import array
 
 
 def parseCSVLine(line, expectedLen=None):
@@ -16,7 +17,7 @@ def parseCSVLine(line, expectedLen=None):
     else:
         data = line.split(",", expectedLen - 1)
         if len(data) != expectedLen:
-            raise Exception("line passed to parseCSVLine() was not of expected length")
+            raise RuntimeError, "line passed to parseCSVLine() was not of expected length"
         return data
 
 
@@ -40,7 +41,7 @@ def txHashes():
             data = parseCSVLine(line, 3)
             txID, txHash = int(data[0]), data[1]
             if len(hashes) != txID:
-                raise Exception("mismatch between txID and len(hashes)")
+                raise RuntimeError, "mismatch between txID and len(hashes)"
             hashes.append(txHash)
 
     return hashes
@@ -56,7 +57,7 @@ def blockTimes():
             data = parseCSVLine(line, 5)
             blockID, timestamp = int(data[0]), int(data[3])
             if blockID != len(blocktimes):
-                raise Exception("mismatch between blockID and len(blocktimes)")
+                raise RuntimeError, "mismatch between blockID and len(blocktimes)"
             blocktimes.append(timestamp)
 
     return blocktimes
@@ -85,7 +86,7 @@ def spentOutputsDict():
             data = parseCSVLine(line, 6)
             txID, index, value, address = data[0], data[1], data[2], data[4]
             if int(txID) >= len(hashes):
-                raise Exception("output txID " + txID + " is outside the range available in hashes  -==-  maximum available txID is " + str(len(hashes)))
+                raise RuntimeError, "output txID " + txID + " is outside the range available in hashes  -==-  maximum available txID is " + str(len(hashes))
             txHash = hashes[int(txID)]
             dictIndex = txHash + "," + index
             # if it isn't in the dict, it isn't spent; continue
@@ -111,6 +112,27 @@ def outputsTxIDs():
                 txIDs.append(txID)
 
     return txIDs
+
+def outputsToInputs():
+    '''Returns a dict in which the is (outputTxID, outputIndex) and the value is a tuple: (inputTxID, inputIndex).
+    This data structure is used to relate spent outputs to their inputs, so unspent outputs are not represented.
+    Because this is used for file-writing, the values are returned as strings rather than ints (this saves a lot of time).
+    '''
+
+    with open("bitcoinData/newInputs.csv", "r") as newInputs:
+        
+        outputs = dict()
+
+        for line in newInputs:
+            data = parseCSVLine(line, 8)
+            inputTxID, inputIndex, outputTxID, outputIndex = data[0], data[2], data[6], newlineTrim(data[7])
+            
+            dictIndex = (outputTxID, outputIndex)
+            if dictIndex in outputs:
+                raise RuntimeError, "output already assigned input"
+            outputs[dictIndex] = (inputTxID, inputIndex)
+
+    return outputs
 
 
 def getAddresses():
@@ -235,7 +257,7 @@ def usersByTx(useHeur = True):
             outputUsers[txID].append(users[data[5]])
 
     if len(inputUsers) != len(outputUsers):
-        raise Exception("mismatch in length between inputUsers and outputUsers")
+        raise RuntimeError, "mismatch in length between inputUsers and outputUsers"
 
     return zip(inputUsers, outputUsers)
 
@@ -250,7 +272,7 @@ def txTimestamps():
             data = parseCSVLine(line, 6)
             txID, timestamp = int(data[0]), int(data[4])
             if len(txsByTime) != txID:
-                raise Exception("mismatch between txID and length of txsByTime")
+                raise RuntimeError, "mismatch between txID and length of txsByTime"
             txsByTime.append(timestamp)
 
     return txsByTime

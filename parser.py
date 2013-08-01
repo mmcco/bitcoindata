@@ -111,4 +111,4 @@ with open("outputs.csv", "r") as outputsFile, open("bitcoinData/newOutputs.csv",
         data.insert(1, txHash)
         data.append(inputTxID)
         data.append(inputIndex)
-        newOutputs.write(",".join(txID, txHash, ) + '\n')
+        newOutputs.write(",".join(data) + '\n')

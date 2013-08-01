@@ -1,13 +1,10 @@
-# new logic:
-# (1) go through inputs, get evey spent output's value
-# (2) go through outputs, only get info if spent (in previously populated dict)
-# (3) go back thfough inputs, writing info
+'''inputs.py: Writes inputs from ./inputs.csv to ./bitcoinData/newInputs.csv.
+In the process, it converts the outputTxHash to an outputTxID, and inserts the txHash, address, and value.
+It assumes that blocks.py and txs.py have been run and that their respective outputs exist in ./bitcoinData
+'''
 
 from dataStructs import txHashes, parseCSVLine, spentOutputsDict, newlineTrim
 
-# we will first get the addresses and values from the outputs and insert them into the inputs
-# we will also insert the txHash into the inputs (which initially only has the txID)
-# finally, we will also replace the outputTxHash (which is not a unique identifier of a tx) with an outputTxID (which is a unique identifier of a tx)
 hashes = txHashes()
 spentOutputs = spentOutputsDict()
 
