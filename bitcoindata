@@ -1,0 +1,8 @@
+#!/bin/bash
+
+python blocks.py
+python txs.py
+python inputs.py
+python outputs.py
+python users.py
+python heurusers.py
