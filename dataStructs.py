@@ -318,16 +318,15 @@ def addressHistory():
             txID, outputIndex, value, address = int(data[0]), int(data[2]), int(data[3]), data[5]
             # inputTxID is None if the output is unspent
             inputTxID = int(data[6]) if data[6] else None
-            addresses.setdefault(address, set()).add((txID, outputIndex, value, None))
+            addresses.setdefault(address, []).append((txID, outputIndex, value, inputTxID))
 
-    # temporary print, DELETE
-    print "finished loading outputs, len(addresses):", len(addresses)
+            if len(addresses[address]) - 1 != outputIndex:
+                raise RuntimeError("Error: mismatch with output index")
 
-    [address.sort(key = lambda x: x[0]) for address in addresses]
     return addresses
 
 
-def userHistory(useHeur = True):
+def userHistory(useHeur=True):
     '''This function is the counterpart to addressHistory(), using userIDs as the key instead of addresses.
     Like addressHistory, the return value is a list of outputs owned by the given user.
     The outputs are in the form (txID, outputIndex, value, spentInTxID)
@@ -337,11 +336,12 @@ def userHistory(useHeur = True):
     users = addressUsers(useHeur)
     userHistories = dict()
 
-    for address, history in addressHistories.items():
-        userHistories.setdefault(users[address], [])
-        userHistories[users[address]] += history
+    for address, history in addressHistories.iteritems():
+        user = users[address]
+        userHistories.setdefault(user, [])
+        userHistories[user] += history
 
-    [userHistory.sort(key = lambda x: x[0]) for userHistory in userHistories]
+    [userHistory.sort(key = lambda x: (x[0], x[1])) for userHistory in userHistories]
     return userHistories
 
 

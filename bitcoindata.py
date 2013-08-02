@@ -10,10 +10,16 @@ if __name__ == "__main__":
         os.makedirs("bitcoinData")
 
     execfile("blocks.py")
+    print "blocks written"
     execfile("txs.py")
+    print "transactions written"
     execfile("inputs.py")
+    print "inputs written"
     execfile("outputs.py")
+    print "outputs written"
 
     execfile("users.py")
+    print "classic user heuristic finished"
     execfile("heurusers.py")
+    print "new user heuristic finished"
 #    execfile("networkXGraph.py")
