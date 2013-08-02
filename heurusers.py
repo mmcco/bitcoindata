@@ -25,7 +25,7 @@ def getRoot(addr):
 
 # executes union-find on a tx's inputs
 def union(args):
-    
+
     if len(args) < 2:
         raise Exception("union() passed a list of length < 2")
 
@@ -33,19 +33,19 @@ def union(args):
         if addr not in addresses:
             raise Exception(addr, "is passed to union() but does not exist in the addresses dict")
 
-    roots = set(map (getRoot, args))
+    roots = set(map(getRoot, args))
 
     # if the roots are already equal, we're done
     if len(roots) == 1:
         return
 
     rootRanks = [(root, addresses[root]) for root in roots]
-    parent = max (rootRanks, key = (lambda x: x[1]))
+    parent = max(rootRanks, key=(lambda x: x[1]))
     rootRanks.remove(parent)
     # make everyone child root point to the parent root
     for child in rootRanks:
         addresses[child[0]] = parent[0]
-    
+
     # increment the root's rank if we're connecting a tree of equal rank
     if type(addresses[parent[0]]) != int:
         raise Exception(parent[0], "was used as a parent, but its dict value is", addresses[parent[0]], "which is not of type int")
@@ -62,14 +62,14 @@ def outputUnion(args, txID):
 
     if len(args) < 2:
         raise Exception("outputUnion was passed a set of length < 2")
-    
+
     for addr in args:
         if addr not in addresses:
             raise Exception(addr, "is passed to outputUnion() but does not exist in the addresses dict")
 
     # generate a list of tuples associating each address with a boolean that describes whether it has been used yet
     boolTuples = [(addr, addr in usedAddresses) for addr in args]
-    
+
     # if there isn't exactly one unused address in the outputs set, we're done
     # if there is exactly one, store it as address and union it with the inputs
     executeUnion = False
@@ -84,7 +84,7 @@ def outputUnion(args, txID):
             break
 
     # add args to list of used addresses
-    map (usedAddresses.add, args)
+    map(usedAddresses.add, args)
 
     if not executeUnion:
         return
@@ -104,7 +104,7 @@ txs = zip(itertools.count(), inputAddresses(), outputAddresses())
 
 print "previous dicts zipped into txs dict"
 
-addresses = dict() # associates address with user
+addresses = dict()  # associates address with user
 
 # populate addresses dict, making an index of value 0 for each address
 for address in getAddresses():
@@ -122,7 +122,7 @@ for tx in txs:
     # if there are no inputs then it's a block reward, and can't be unioned
     if len(inputs) == 0:
         continue
-    
+
     # if there is only one input and one output, no unions can be made
     elif len(inputs) < 2 and len(outputs) < 2:
         continue
@@ -148,10 +148,10 @@ for tx in txs:
 
 print "union completed"
 
-usersDict = dict() # associates users' address sets with their roots
+usersDict = dict()  # associates users' address sets with their roots
 
 for key, value in addresses.iteritems():
-    
+
     root = key
     while type(addresses[root]) != int:
         root = addresses[root]

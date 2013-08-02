@@ -17,7 +17,7 @@ def parseCSVLine(line, expectedLen=None):
     else:
         data = line.split(",", expectedLen - 1)
         if len(data) != expectedLen:
-            raise RuntimeError, "line passed to parseCSVLine() was not of expected length"
+            raise RuntimeError("line passed to parseCSVLine() was not of expected length")
         return data
 
 
@@ -41,7 +41,7 @@ def txHashes():
             data = parseCSVLine(line, 3)
             txID, txHash = int(data[0]), data[1]
             if len(hashes) != txID:
-                raise RuntimeError, "mismatch between txID and len(hashes)"
+                raise RuntimeError("mismatch between txID and len(hashes)")
             hashes.append(txHash)
 
     return hashes
@@ -57,7 +57,7 @@ def blockTimes():
             data = parseCSVLine(line, 5)
             blockID, timestamp = int(data[0]), int(data[3])
             if blockID != len(blocktimes):
-                raise RuntimeError, "mismatch between blockID and len(blocktimes)"
+                raise RuntimeError("mismatch between blockID and len(blocktimes)")
             blocktimes.append(timestamp)
 
     return blocktimes
@@ -70,7 +70,7 @@ def spentOutputsDict():
 
     outputs = dict()
     hashes = txHashes()
-    
+
     # initialize the outputs dict with all spent outputs
     with open("inputs.csv", "r") as inputsFile:
         inputsFile.readline()
@@ -79,14 +79,13 @@ def spentOutputsDict():
             outputTxHash, outputIndex = data[3], newlineTrim(data[4])
             outputs[outputTxHash + "," + outputIndex] = []
 
-    
     with open("outputs.csv", "r") as outputsFile:
         outputsFile.readline()  # skip first line, which is just column names
         for line in outputsFile:
             data = parseCSVLine(line, 6)
             txID, index, value, address = data[0], data[1], data[2], data[4]
             if int(txID) >= len(hashes):
-                raise RuntimeError, "output txID " + txID + " is outside the range available in hashes  -==-  maximum available txID is " + str(len(hashes))
+                raise RuntimeError("output txID " + txID + " is outside the range available in hashes  -==-  maximum available txID is " + str(len(hashes)))
             txHash = hashes[int(txID)]
             dictIndex = txHash + "," + index
             # if it isn't in the dict, it isn't spent; continue
@@ -113,6 +112,7 @@ def outputsTxIDs():
 
     return txIDs
 
+
 def outputsToInputs():
     '''Returns a dict in which the is (outputTxID, outputIndex) and the value is a tuple: (inputTxID, inputIndex).
     This data structure is used to relate spent outputs to their inputs, so unspent outputs are not represented.
@@ -120,16 +120,16 @@ def outputsToInputs():
     '''
 
     with open("bitcoinData/newInputs.csv", "r") as newInputs:
-        
+
         outputs = dict()
 
         for line in newInputs:
             data = parseCSVLine(line, 8)
             inputTxID, inputIndex, outputTxID, outputIndex = data[0], data[2], data[6], newlineTrim(data[7])
-            
+
             dictIndex = (outputTxID, outputIndex)
             if dictIndex in outputs:
-                raise RuntimeError, "output already assigned input"
+                raise RuntimeError("output already assigned input")
             outputs[dictIndex] = (inputTxID, inputIndex)
 
     return outputs
@@ -164,6 +164,7 @@ def inputAddresses():
 
     return addresses
 
+
 def outputAddresses():
     '''Returns a two-dimensional list - the index is the txID, the value is a list of the addresses associated with its outputs.
     This function includes each address only once.
@@ -181,7 +182,8 @@ def outputAddresses():
 
     return addresses
 
-def txOwners(useHeur = True):
+
+def txOwners(useHeur=True):
     '''Returns a list, the index being the txID of the owner of each transaction.
     None is used for block rewards, which have no inputs
     The useHeur boolean determines whether to use the heuristic or traditional users.
@@ -201,7 +203,7 @@ def txOwners(useHeur = True):
     return owners
 
 
-def addressUsers(useHeur = True):
+def addressUsers(useHeur=True):
     '''Returns a dictionary in which the key is the address and the value is the userID.
     The useHeur boolean determines whether to use the heuristic or traditional users.
     It is True by default.
@@ -218,7 +220,7 @@ def addressUsers(useHeur = True):
     return userIDs
 
 
-def users(useHeur = True):
+def users(useHeur=True):
     '''Returns a list whose index is the userID and whose values is a list of that user's addresses.
     The useHeur boolean determines whether to use the heuristic or traditional users.
     It is True by default.
@@ -238,7 +240,7 @@ def users(useHeur = True):
     return users
 
 
-def usersByTx(useHeur = True):
+def usersByTx(useHeur=True):
     '''Returns a list of tuples - the index is the txID, the tuples are (fromUser, [toUsers]).
     fromUser is the user that owns the inputs.
     toUsers are the users that own the outputs.
@@ -248,7 +250,8 @@ def usersByTx(useHeur = True):
 
     users = addressUsers(useHeur)
     inputUsers = txOwners(useHeur)
-    outputUsers = [ [] for x in xrange(len(inputUsers)) ]
+    # an empty list for every tx
+    outputUsers = [[] for x in xrange(len(inputUsers))]
 
     with open("bitcoinData/newOutputs.csv", "r") as outputs:
         for line in outputs:
@@ -257,7 +260,7 @@ def usersByTx(useHeur = True):
             outputUsers[txID].append(users[data[5]])
 
     if len(inputUsers) != len(outputUsers):
-        raise RuntimeError, "mismatch in length between inputUsers and outputUsers"
+        raise RuntimeError("mismatch in length between inputUsers and outputUsers")
 
     return zip(inputUsers, outputUsers)
 
@@ -272,7 +275,7 @@ def txTimestamps():
             data = parseCSVLine(line, 6)
             txID, timestamp = int(data[0]), int(data[4])
             if len(txsByTime) != txID:
-                raise RuntimeError, "mismatch between txID and length of txsByTime"
+                raise RuntimeError("mismatch between txID and length of txsByTime")
             txsByTime.append(timestamp)
 
     return txsByTime
@@ -301,7 +304,7 @@ def priceHistory():
             price, quantity, timestamp = parseCSVLine(line, 3)
             trades.append((timestamp, price))
 
-    trades.sort(key = lambda x: x[0])
+    trades.sort(key=lambda x: x[0])
     return trades
 
 
@@ -341,7 +344,7 @@ def userHistory(useHeur=True):
         userHistories.setdefault(user, [])
         userHistories[user] += history
 
-    [userHistory.sort(key = lambda x: (x[0], x[1])) for userHistory in userHistories]
+    [userHistory.sort(key=lambda x: (x[0], x[1])) for userHistory in userHistories]
     return userHistories
 
 
@@ -349,5 +352,5 @@ def outputsList():
     '''Returns a list of a tuple (txID, outputIndex, value, spentInTxID) for each output.'''
 
     outputs = [output for address in addressHistory().values() for output in address]
-    outputs.sort(key = lambda x: x[0])
+    outputs.sort(key=lambda x: x[0])
     return outputs
