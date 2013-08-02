@@ -1,3 +1,8 @@
+'''outputs.py: Writes outputs from ./outputs.csv to ./bitcoinData/newOutputs.csv.
+In the process, it inserts the txHash, inputTxID, and inputIndex.
+The inputTxID and inputIndex will be empty if the output is unspent.
+'''
+
 from dataStructs import outputsToInputs, parseCSVLine, txHashes
 
 inputsDict = outputsToInputs()
@@ -10,12 +15,12 @@ with open("outputs.csv", "r") as outputsFile, open("bitcoinData/newOutputs.csv",
     for line in outputsFile:
         data = parseCSVLine(line, 6)[:-1]  # drop the last item, it's just empty columns
         outputTxID, outputIndex = data[0], data[1]
-        dictIndex = (outputTxID, outputIndex)
+        dictKey = (outputTxID, outputIndex)
 
-        if dictIndex in inputsDict:
-            inputTxID, inputIndex = inputsDict[dictIndex]
+        if dictKey in inputsDict:
+            inputTxID, inputIndex = inputsDict[dictKey]
             # delete in order to reclaim memory
-            del inputsDict[dictIndex]
+            del inputsDict[dictKey]
 
         else:
             inputTxID = inputIndex = ""
