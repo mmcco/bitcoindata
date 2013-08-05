@@ -10,13 +10,16 @@
 
 import itertools
 from dataStructs import getAddresses, inputAddresses, outputAddresses
+from itertools import chain
 
 
 # returns the given addresses's root
 # does path compression, and therefore changes state (beware)
 def getRoot(addr):
+
     if type(addresses[addr]) == int:
         return addr
+
     else:
         root = getRoot(addresses[addr])
         addresses[addr] = root
@@ -148,37 +151,37 @@ for tx in txs:
 
 print "union completed"
 
+# manual memory clearing
+del txs
+
 usersDict = dict()  # associates users' address sets with their roots
 
 for key, value in addresses.iteritems():
 
-    root = key
-    while type(addresses[root]) != int:
-        root = addresses[root]
+    root = getRoot(key)
+    usersDict.setdefault(root, set()).add(key)
 
-    if not root in usersDict:
-        usersDict[root] = set([key])
+print "dictionary of users indexed by root populated"
 
-    else:
-        usersDict[root].add(key)
+# write each user to a CSV file in the order they were first used
+with open("data/heurusers.csv", "w") as userFile, open("data/heurUsersCount.csv", "w") as countFile:
 
-print "usersDict populated"
+    userID = 0
 
-# generate a list of addresses, each index being a user, from usersDict
-users = []
-with open("data/heurusers.csv", "w") as userFile:
+    # executes for each address, in the order they were created
+    for address in chain(*outputAddresses()):
 
-    for counter, (key, user) in enumerate(usersDict.items()):
-        users.append(user)
-        for address in user:
-            userFile.write(address + "," + str(counter) + "\n")
+        if address in addresses:
 
-print "heurusers.csv written"
+            root = getRoot(address)
+            user = usersDict[root]
+            countFile.write(str(userID) + ',' + str(len(user)) + '\n')
 
-# generate a CSV file associating userIDs with the number of addresses they contain
-with open("data/heurUsersCount.csv", "w") as usersCount:
+            for addr in user:
+                userFile.write(address + ',' + str(userID) + '\n')
+                # so that we only write each once
+                del addresses[addr]
+                    
+            userID += 1
 
-    for counter, user in enumerate(users):
-        usersCount.write(str(counter) + "," + str(len(user)) + "\n")
-
-print "heurUsersCount.csv written"
+print "heurusers.csv and heurUsersCount.csv written"
