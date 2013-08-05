@@ -3,15 +3,15 @@
 # make the data directory if it doesn't already exist
 mkdir -p data
 
-python blocks.py
+python -OO blocks.py
 echo "blocks written"
-python txs.py
+python -OO txs.py
 echo "transactions written"
-python inputs.py
+python -OO inputs.py
 echo "inputs written"
-python outputs.py
+python -OO outputs.py
 echo "outputs written"
-python users.py
+python -OO users.py
 echo "classic user heuristic finished"
-python heurusers.py
+python -OO heurusers.py
 echo "new user heuristic finished"

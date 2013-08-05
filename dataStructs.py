@@ -323,9 +323,6 @@ def addressHistory():
             inputTxID = int(data[6]) if data[6] else None
             addresses.setdefault(address, []).append((txID, outputIndex, value, inputTxID))
 
-            if len(addresses[address]) - 1 != outputIndex:
-                raise RuntimeError("Error: mismatch with output index")
-
     return addresses
 
 

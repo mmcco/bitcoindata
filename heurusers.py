@@ -178,7 +178,7 @@ with open("data/heurusers.csv", "w") as userFile, open("data/heurUsersCount.csv"
             countFile.write(str(userID) + ',' + str(len(user)) + '\n')
 
             for addr in user:
-                userFile.write(address + ',' + str(userID) + '\n')
+                userFile.write(addr + ',' + str(userID) + '\n')
                 # so that we only write each once
                 del addresses[addr]
                     
