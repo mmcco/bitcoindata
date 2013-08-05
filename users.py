@@ -86,7 +86,7 @@ for key, value in addresses.iteritems():
 print "dictionary of users indexed by root populated"
 
 # write each user to a CSV file
-with open("bitcoinData/users.csv", "w") as userFile, open("bitcoinData/usersCount.csv", "w") as countFile:
+with open("data/users.csv", "w") as userFile, open("data/usersCount.csv", "w") as countFile:
 
     users = []
 

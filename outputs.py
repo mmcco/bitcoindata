@@ -1,4 +1,4 @@
-'''outputs.py: Writes outputs from ./outputs.csv to ./bitcoinData/newOutputs.csv.
+'''outputs.py: Writes outputs from ./outputs.csv to ./data/newOutputs.csv.
 In the process, it inserts the txHash, inputTxID, and inputIndex.
 The inputTxID and inputIndex will be empty if the output is unspent.
 '''
@@ -8,7 +8,7 @@ from dataStructs import outputsToInputs, parseCSVLine, txHashes
 inputsDict = outputsToInputs()
 hashes = txHashes()
 
-with open("outputs.csv", "r") as outputsFile, open("bitcoinData/newOutputs.csv", "w") as newOutputs:
+with open("outputs.csv", "r") as outputsFile, open("data/newOutputs.csv", "w") as newOutputs:
 
     outputsFile.readline()  # skip column names
 

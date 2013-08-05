@@ -1,4 +1,4 @@
-'''blocks.py: Writes blocks from ./blocks.csv to ./bitcoinData/newBlocks.csv.
+'''blocks.py: Writes blocks from ./blocks.csv to ./data/newBlocks.csv.
 In the process, it converts each block's timestamp from ISO 8601 to a Unix timestamp.
 '''
 
@@ -9,7 +9,7 @@ import datetime
 # !!! This data type assumes that you're parsing from the genesis block; switch to dict if writing an automated updater !!!
 blockTimes = []  # location is blockID, value is Unix timestamp
 
-with open("blocks.csv", "r") as blocks, open("bitcoinData/newBlocks.csv", "w") as newBlocks:
+with open("blocks.csv", "r") as blocks, open("data/newBlocks.csv", "w") as newBlocks:
     blocks.readline()  # skip first line, which is just column names
     for line in blocks:
         data = line.split(",", 4)

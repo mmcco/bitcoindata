@@ -18,7 +18,7 @@ cutoffTime = timestamps[0] + 259200
 oldTime = cutoffTime - 7776000
 lastTxID = 0
 
-with open("bitcoinData/oldCoins.csv", "w") as oldCoinsFile:
+with open("data/oldCoins.csv", "w") as oldCoinsFile:
     while cutoffTime <= timestamps[-1]:
         
         # find the last txID in this timeframe

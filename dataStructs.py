@@ -36,7 +36,7 @@ def txHashes():
     # allowing transactions.csv to be used allows us to use this in parser.py (before txs.cvs exists)
     hashes = []
 
-    with open("bitcoinData/txs.csv", "r") as txsFile:
+    with open("data/txs.csv", "r") as txsFile:
         for line in txsFile:
             data = parseCSVLine(line, 3)
             txID, txHash = int(data[0]), data[1]
@@ -52,7 +52,7 @@ def blockTimes():
 
     blocktimes = []
 
-    with open("bitcoinData/newBlocks.csv", "r") as blocksFile:
+    with open("data/newBlocks.csv", "r") as blocksFile:
         for line in blocksFile:
             data = parseCSVLine(line, 5)
             blockID, timestamp = int(data[0]), int(data[3])
@@ -103,7 +103,7 @@ def outputsTxIDs():
 
     txIDs = []
 
-    with open("bitcoinData/txs.csv", "r") as txsFile:
+    with open("data/txs.csv", "r") as txsFile:
         for line in txsFile:
             data = parseCSVLine(line, 8)
             txID, numOutputs = int(data[0]), int(data[6])
@@ -119,7 +119,7 @@ def outputsToInputs():
     Because this is used for file-writing, the values are returned as strings rather than ints (this saves a lot of time).
     '''
 
-    with open("bitcoinData/newInputs.csv", "r") as newInputs:
+    with open("data/newInputs.csv", "r") as newInputs:
 
         outputs = dict()
 
@@ -138,7 +138,7 @@ def outputsToInputs():
 def getAddresses():
     '''Returns a set of all addresses.'''
 
-    with open("bitcoinData/newOutputs.csv", "r") as outputs:
+    with open("data/newOutputs.csv", "r") as outputs:
         addressSet = set()
         for line in outputs:
             data = parseCSVLine(line, 7)
@@ -152,7 +152,7 @@ def inputAddresses():
     This function includes each address only once.
     '''
 
-    with open("bitcoinData/newInputs.csv", "r") as inputs:
+    with open("data/newInputs.csv", "r") as inputs:
         addresses = []
         for line in inputs:
             data = parseCSVLine(line, 5)
@@ -170,7 +170,7 @@ def outputAddresses():
     This function includes each address only once.
     '''
 
-    with open("bitcoinData/newOutputs.csv", "r") as outputs:
+    with open("data/newOutputs.csv", "r") as outputs:
         addresses = []
         for line in outputs:
             data = parseCSVLine(line, 7)
@@ -210,7 +210,7 @@ def addressUsers(useHeur=True):
     '''
 
     userIDs = dict()
-    filename = "bitcoinData/heurusers.csv" if useHeur else "bitcoinData/users.csv"
+    filename = "data/heurusers.csv" if useHeur else "data/users.csv"
 
     with open(filename, "r") as usersFile:
         for line in usersFile:
@@ -227,7 +227,7 @@ def users(useHeur=True):
     '''
 
     users = [[]]
-    filename = "bitcoinData/heurusers.csv" if useHeur else "bitcoinData/users.csv"
+    filename = "data/heurusers.csv" if useHeur else "data/users.csv"
 
     with open("bitcoin/heurusers.csv", "r") as usersFile:
         for line in usersFile:
@@ -253,7 +253,7 @@ def usersByTx(useHeur=True):
     # an empty list for every tx
     outputUsers = [[] for x in xrange(len(inputUsers))]
 
-    with open("bitcoinData/newOutputs.csv", "r") as outputs:
+    with open("data/newOutputs.csv", "r") as outputs:
         for line in outputs:
             data = parseCSVLine(line, 7)
             txID, address = int(data[0]), data[5]
@@ -270,7 +270,7 @@ def txTimestamps():
 
     txsByTime = []
 
-    with open("bitcoinData/txs.csv", "r") as txsFile:
+    with open("data/txs.csv", "r") as txsFile:
         for line in txsFile:
             data = parseCSVLine(line, 6)
             txID, timestamp = int(data[0]), int(data[4])
@@ -285,7 +285,7 @@ def blockRewardIDs():
     '''Returns a list of the txIDs of all block rewards.'''
 
     rewardTxIDs = []
-    with open("bitcoinData/txs.csv", "r") as txsFile:
+    with open("data/txs.csv", "r") as txsFile:
         for line in txsFile:
             data = parseCSVLine(line, 7)
             if int(data[5]) == 0:
@@ -299,7 +299,7 @@ def priceHistory():
 
     trades = []
 
-    with open("bitcoinData/trades.csv", "r") as tradesFile:
+    with open("data/trades.csv", "r") as tradesFile:
         for line in tradesFile:
             price, quantity, timestamp = parseCSVLine(line, 3)
             trades.append((timestamp, price))
@@ -315,7 +315,7 @@ def addressHistory():
     '''
 
     addresses = dict()
-    with open("bitcoinData/newOutputs.csv", "r") as outputs:
+    with open("data/newOutputs.csv", "r") as outputs:
         for line in outputs:
             data = parseCSVLine(line, 8)
             txID, outputIndex, value, address = int(data[0]), int(data[2]), int(data[3]), data[5]

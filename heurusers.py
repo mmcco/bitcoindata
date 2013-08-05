@@ -166,7 +166,7 @@ print "usersDict populated"
 
 # generate a list of addresses, each index being a user, from usersDict
 users = []
-with open("bitcoinData/heurusers.csv", "w") as userFile:
+with open("data/heurusers.csv", "w") as userFile:
 
     for counter, (key, user) in enumerate(usersDict.items()):
         users.append(user)
@@ -176,7 +176,7 @@ with open("bitcoinData/heurusers.csv", "w") as userFile:
 print "heurusers.csv written"
 
 # generate a CSV file associating userIDs with the number of addresses they contain
-with open("bitcoinData/heurUsersCount.csv", "w") as usersCount:
+with open("data/heurUsersCount.csv", "w") as usersCount:
 
     for counter, user in enumerate(users):
         usersCount.write(str(counter) + "," + str(len(user)) + "\n")

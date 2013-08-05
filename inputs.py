@@ -1,6 +1,6 @@
-'''inputs.py: Writes inputs from ./inputs.csv to ./bitcoinData/newInputs.csv.
+'''inputs.py: Writes inputs from ./inputs.csv to ./data/newInputs.csv.
 In the process, it converts the outputTxHash to an outputTxID, and inserts the txHash, address, and value.
-It assumes that blocks.py and txs.py have been run and that their respective outputs exist in ./bitcoinData
+It assumes that blocks.py and txs.py have been run and that their respective outputs exist in ./data
 '''
 
 from dataStructs import txHashes, parseCSVLine, spentOutputsDict, newlineTrim
@@ -8,7 +8,7 @@ from dataStructs import txHashes, parseCSVLine, spentOutputsDict, newlineTrim
 hashes = txHashes()
 spentOutputs = spentOutputsDict()
 
-with open("inputs.csv", "r") as inputs, open("bitcoinData/newInputs.csv", "w") as newInputs:
+with open("inputs.csv", "r") as inputs, open("data/newInputs.csv", "w") as newInputs:
     inputs.readline()  # skip first line, which is just column names
     for line in inputs:
 
