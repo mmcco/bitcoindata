@@ -6,7 +6,7 @@ The tools focus on parsing the CSV output into more usable format, grouping addr
 
 Everything is currently under heavy development and is therefore likely to be broken. Within the next month I hope to have everything in stable working order.
 
-To run all of the main scripts at once, first ensure that all four of the blockparser CSV files (`inputs.csv`, `outputs.csv`, `transactions.csv`, `blocks.csv`) are in this repo's directory. Then run `bitcoindata.py`. The new data will be larger than the original files, and the original files will not be deleted, so make sure you have enough space in the directory.
+To run all of the main scripts at once, first ensure that all four of the blockparser CSV files (`inputs.csv`, `outputs.csv`, `transactions.csv`, `blocks.csv`) are in this repo's directory. Then run `bitcoindata`. The new data will be larger than the original files, and the original files will not be deleted, so make sure you have enough space in the directory.
 
 New files generated:  
 `users.csv`: A CSV file that associates addresses with their user IDs. This uses the classic user generation heuristic described by [Reid & Harrigan](http://arxiv.org/abs/1107.4524).  

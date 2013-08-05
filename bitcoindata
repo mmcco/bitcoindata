@@ -1,8 +1,17 @@
 #!/bin/bash
 
+# make the data directory if it doesn't already exist
+mkdir -p data
+
 python blocks.py
+echo "blocks written"
 python txs.py
+echo "transactions written"
 python inputs.py
+echo "inputs written"
 python outputs.py
+echo "outputs written"
 python users.py
+echo "classic user heuristic finished"
 python heurusers.py
+echo "new user heuristic finished"
