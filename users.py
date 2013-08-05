@@ -8,10 +8,11 @@
 # temporary path extension to fix symlink bug
 import sys
 sys.path.append("/home/mike/bitcoindata")
-from dataStructs import getAddresses, inputAddresses
+from dataStructs import getAddresses, inputAddresses, outputAddresses
+from itertools import chain
 
 
-# returns the given addresses's root and rank in a tuple
+# returns the given addresses's root
 def getRoot(addr):
     if type(addresses[addr]) == int:
         return addr
@@ -69,30 +70,37 @@ for tx in txs:
 
 print "union-find completed"
 
+# manual memory clearing
+del txs
+
 usersDict = dict()  # associates users' address sets with their roots
 
 for key, value in addresses.iteritems():
 
-    root = key
-    while type(addresses[root]) != int:
-        root = addresses[root]
-
-    if not root in usersDict:
-        usersDict[root] = set([key])
-
-    else:
-        usersDict[root].add(key)
+    root = getRoot(key)
+    usersDict.setdefault(root, set()).add(key)
 
 print "dictionary of users indexed by root populated"
 
-# write each user to a CSV file
+# write each user to a CSV file in the order they were first used
 with open("data/users.csv", "w") as userFile, open("data/usersCount.csv", "w") as countFile:
 
-    users = []
+    userID = 0
 
-    for counter, (key, user) in enumerate(usersDict.iteritems()):
-        if len(user) == 0:
-            raise Exception("trying to write a user with no addresses")
-        countFile.write(str(counter) + "," + str(len(user)) + '\n')
-        for address in user:
-            userFile.write(address + "," + str(counter) + "\n")
+    # executes for each address, in the order they were created
+    for address in chain(*outputAddresses()):
+
+        if address in addresses:
+
+            root = getRoot(address)
+            user = usersDict[root]
+            countFile.write(str(userID) + ',' + str(len(user)) + '\n')
+
+            for addr in user:
+                userFile.write(address + ',' + str(userID) + '\n')
+                # so that we only write each once
+                del addresses[addr]
+                    
+            userID += 1
+
+print "users.csv and usersCount.csv written"
