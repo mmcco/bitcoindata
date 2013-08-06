@@ -5,6 +5,8 @@
 
 # all coins are stored in unspent outputs; we can therefore calculate the time distribution of coins simply by going through outputs and collecting unspent outputs
 
+# a simpler way to do this would be to initially sort the outputs into "old coins" and "new coins"; each pass would be a sweep to delete all spent old outputs and move all aged new outputs into the "old" list
+
 from dataStructs import outputsList, txTimestamps
 
 outputs = outputsList()
@@ -19,31 +21,36 @@ oldTime = cutoffTime - 7776000
 lastTxID = 0
 
 with open("data/oldCoins.csv", "w") as oldCoinsFile:
+
+    # stops executing when we've already processed all transactions
     while cutoffTime <= timestamps[-1]:
         
         # find the last txID in this timeframe
         while cutoffTime >= timestamps[lastTxID]:
+
             lastTxID += 1
+            oldCoins = freshCoins = 0
 
         for output in outputs:
+
+            txID, value, spentInTxID = output[0], output[2], output[3]
 
             if txID > lastTxID:
                 break
 
-            # if the output has already been spent, ignore it and continue
-            elif output[3] is not None and output[3] <= lastTxID:
+            # if the output has already been spent, remove it and continue
+            if spentInTxID is not None and spentInTxID <= lastTxID:
+                outputs.remove(output)
                 continue
 
+            if timestamps[txID] < oldTime:
+                oldCoins += value
             else:
-                if timestamps[output[0]] < oldTime:
-                    oldCoins += output[2]
-                else:
-                    freshCoins += output[2]
+                freshCoins += value
 
+        if (oldCoins + freshCoins) != 0:
             percentOld = float(oldCoins) / (oldCoins + freshCoins)
+            oldCoinsFile.write(str(cutoffTime) + "," + str(percentOld) + '\n')
 
-            oldCoinsFile.write(str(cutoffTime) + "," + percentOld)
-
-            oldCoins = freshCoins = 0
             cutoffTime += 259200
             oldTime += 259200

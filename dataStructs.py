@@ -351,3 +351,42 @@ def outputsList():
     outputs = [output for address in addressHistory().values() for output in address]
     outputs.sort(key=lambda x: x[0])
     return outputs
+
+
+def addressBalances():
+    '''Returns a dict in which the key is the address and the value is its balance.'''
+
+    balances = dict()
+
+    with open("data/newOutputs.csv", "r") as outputsFile:
+
+        for line in outputsFile:
+            data = parseCSVLine(line, 7)
+            value, address = int(data[3]), data[5]
+            if address not in balances:
+                balances[address] = 0
+            balances[address] += value
+
+    with open("data/newInputs.csv", "r") as inputsFile:
+        
+        for line in inputsFile:
+            data = parseCSVLine(line, 6)
+            address, value = data[3], int(data[4])
+            if address not in balances:
+                raise RuntimeError("input without corresponding address")
+            balances[address] -= value
+
+    return balances
+
+
+def userBalances(useHeur=True):
+    '''Returns a list in which the index is the userID and the value is that user's balance'''
+
+    balances = addressBalances()
+    users = addressUsers(useHeur)
+    usersBalances = [0 for x in xrange(len(users))]
+
+    for address, balance in balances.iteritems():
+        usersBalances[users[address]] += balance
+
+    return usersBalances

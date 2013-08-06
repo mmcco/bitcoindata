@@ -81,6 +81,7 @@ for key, value in addresses.iteritems():
     usersDict.setdefault(root, set()).add(key)
 
 print "dictionary of users indexed by root populated"
+print "largest user in dictionary: " + str(len(max(usersDict.values(), key=len)))
 
 # write each user to a CSV file in the order they were first used
 with open("data/users.csv", "w") as userFile, open("data/usersCount.csv", "w") as countFile:
