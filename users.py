@@ -101,7 +101,7 @@ with open("data/users.csv", "w") as userFile, open("data/usersCount.csv", "w") a
                 userFile.write(addr + ',' + str(userID) + '\n')
                 # so that we only write each once
                 del addresses[addr]
-                    
+
             userID += 1
 
 print "users.csv and usersCount.csv written"

@@ -368,7 +368,7 @@ def addressBalances():
             balances[address] += value
 
     with open("data/newInputs.csv", "r") as inputsFile:
-        
+
         for line in inputsFile:
             data = parseCSVLine(line, 6)
             address, value = data[3], int(data[4])

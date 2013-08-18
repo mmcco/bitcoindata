@@ -21,7 +21,7 @@ cursor.execute("select count(*) from bitstamp;")
 offset = cursor.fetchone()[0]
 
 while True:
-    
+
     url = "https://www.bitstamp.net/api/transactions/?sort=asc;limit=5000;offset=" + str(offset)
     response = urllib2.urlopen(url)
     jsonData = json.load(response)
@@ -42,7 +42,7 @@ while True:
     cursor.executemany("insert into bitstamp (timestamp, tid, price, amount) values (%s, %s, %s, %s);", jsonValues)
 
     offset += len(jsonData)
-    
+
     # sleep for longer if we have everything
     if len(jsonData) != 0:
         time.sleep(200)

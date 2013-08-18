@@ -6,13 +6,13 @@ users = open("users.csv", "r")
 addresses = dict()
 
 for line in users:
-    
+
     data = line.split(",")
     if len(data) != 2:
         raise Exception("bad line in users.csv")
 
     address = data[0]
-    userID = data[1][:-1] # remove newline
+    userID = data[1][:-1]  # remove newline
     btc.addNode(userID)
     addresses[address] = userID
 
@@ -22,7 +22,7 @@ inputs = open("newInputs.csv", "r")
 txs = []
 
 for line in inputs:
-    
+
     data = line.split(",", 4)
     txID = int(data[0])
     address = data[3]
