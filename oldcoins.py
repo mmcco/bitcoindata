@@ -24,7 +24,7 @@ with open("data/oldCoins.csv", "w") as oldCoinsFile:
 
     # stops executing when we've already processed all transactions
     while cutoffTime <= timestamps[-1]:
-        
+
         # find the last txID in this timeframe
         while cutoffTime >= timestamps[lastTxID]:
 
