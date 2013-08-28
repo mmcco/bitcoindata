@@ -1,3 +1,4 @@
+### *** THIS IS NOT A PART OF THE CORE BITCOINDATA SOFTWARE *** ###
 # this script recursively downloads transaction history from Bitstamp (a Bitcoin exchange) and stores the data in a database
 # it assumes you already have a MySQL database named "btc"
 
