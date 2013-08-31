@@ -7,7 +7,7 @@ from dataStructs import blockTimes, parseCSVLine
 import os.path
 
 if not os.path.isfile("data/newBlocks.csv"):
-    raise Exception("Error: must run blocks.py and have its output file (data/newBlocks.csv) before running this script")
+    raise RuntimeError("Error: must run blocks.py and have its output file (data/newBlocks.csv) before running this script")
 
 # !!! This data type assumes that you're parsing from the genesis block; switch to dict if writing an automated updater !!!
 blocktimes = blockTimes()
