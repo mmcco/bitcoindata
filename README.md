@@ -1,14 +1,14 @@
 bitcoindata
 ===========
 
-*This code introduces a set union algorithm to attempt to discern which groups
-of bitcoin accounts are owned by the same entity.  This concept was [developed
+*This code introduces a set union algorithm to discern which groups of bitcoin
+accounts are owned by the same entity.  This concept was [developed
 concurrently](http://cseweb.ucsd.edu/~smeiklejohn/files/imc13.pdf), in a much
 more formal and throughly executed form, by Dr. [Sarah
 Meiklejohn](http://cseweb.ucsd.edu/~smeiklejohn/bitcoin.html) as part of her
-PhD program at UC San Diego.
+PhD program at UC San Diego.*
 
-There are some interesting parts to this code, and the set union idea was
+*There are some interesting parts to this code, and the set union idea was
 novel. However, this code was written by a 19-year-old research intern with
 no previous real-world coding experience. It's here more for historical
 purposes. I'm happy to help you work with it if you're interested. However,
