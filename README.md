@@ -49,8 +49,5 @@ We are using a machine with 22 GB of RAM, and some of these operations use all
 of it. Therefore, some of this code may be unrealistically slow on a typical
 personal computer.
 
-Support may later be added to automatically integrate trade history data from
-exchanges such as Mt. Gox and Bitstamp.
-
 This was written as part of a summer research project at Colgate University,
 with my advisor Vijay Ramachandran.
