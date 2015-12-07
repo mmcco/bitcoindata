@@ -24,10 +24,6 @@ The tools focus on parsing the CSV output into more usable format, grouping
 addresses by user based on multiple heuristics, and preparing the transaction
 data for network analysis.
 
-Everything is currently under heavy development and is therefore likely to be
-broken. Within the next month I hope to have everything in stable working
-order.
-
 To run all of the main scripts at once, first ensure that all four of the
 blockparser CSV files (`inputs.csv`, `outputs.csv`, `transactions.csv`,
 `blocks.csv`) are in this repo's directory. Then run `bitcoindata`. The new
