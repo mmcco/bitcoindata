@@ -8,7 +8,7 @@ more formal and throughly executed form, by Dr. [Sarah
 Meiklejohn](http://cseweb.ucsd.edu/~smeiklejohn/bitcoin.html) as part of her
 PhD work at UC San Diego.*
 
-*There are some interesting parts to this code, and the set union idea was
+*There are some interesting parts, and the set union idea was
 novel. However, this code was written by a 19-year-old research intern with
 no previous real-world coding experience. It's here more for historical
 purposes. I'm happy to help you work with it if you're interested. However,
